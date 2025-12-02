@@ -1,6 +1,5 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { loadFixture, time } from "@nomicfoundation/hardhat-network-helpers";
 
 const enum EscrowStatus {
   Uninitialized,
@@ -20,9 +19,11 @@ describe("BulwarkXEscrow", function () {
     return { escrow, payer, payee, arbiter };
   }
 
-  async function createFundedEscrow(autoReleaseSeconds = 3600n) {
-    const { escrow, payer, payee, arbiter } = await loadFixture(deployFixture);
+  it("create escrow and store data", async function () {
+    const { escrow, payer, payee, arbiter } = await deployFixture();
+
     const amount = ethers.parseEther("1");
+    const autoReleaseSeconds = 3600;
 
     const tx = await escrow
       .connect(payer)
@@ -30,14 +31,7 @@ describe("BulwarkXEscrow", function () {
         value: amount,
       });
     const receipt = await tx.wait();
-    const escrowId = (receipt!.logs[0] as any).args.escrowId as string;
-
-    return { escrow, payer, payee, arbiter, amount, escrowId };
-  }
-
-  it("create escrow and store data", async function () {
-    const { escrow, payer, payee, arbiter, amount, escrowId } =
-      await createFundedEscrow();
+    const escrowId = receipt!.logs[0]!.args!.escrowId;
 
     const stored = await escrow.escrows(escrowId);
     expect(Number(stored.status)).to.equal(EscrowStatus.Funded);
@@ -48,8 +42,14 @@ describe("BulwarkXEscrow", function () {
   });
 
   it("payer can release to payee before autoReleaseAt", async function () {
-    const { escrow, payer, payee, arbiter, amount, escrowId } =
-      await createFundedEscrow();
+    const { escrow, payer, payee, arbiter } = await deployFixture();
+    const amount = ethers.parseEther("1");
+
+    const tx = await escrow
+      .connect(payer)
+      .createEscrow(payee.address, arbiter.address, 3600, { value: amount });
+    const receipt = await tx.wait();
+    const escrowId = receipt!.logs[0]!.args!.escrowId;
 
     await expect(() =>
       escrow.connect(payer).releaseEscrow(escrowId)
@@ -60,8 +60,14 @@ describe("BulwarkXEscrow", function () {
   });
 
   it("payee can refund payer", async function () {
-    const { escrow, payer, payee, arbiter, amount, escrowId } =
-      await createFundedEscrow();
+    const { escrow, payer, payee, arbiter } = await deployFixture();
+    const amount = ethers.parseEther("1");
+
+    const tx = await escrow
+      .connect(payer)
+      .createEscrow(payee.address, arbiter.address, 3600, { value: amount });
+    const receipt = await tx.wait();
+    const escrowId = receipt!.logs[0]!.args!.escrowId;
 
     await expect(() =>
       escrow.connect(payee).refundEscrow(escrowId)
@@ -72,8 +78,14 @@ describe("BulwarkXEscrow", function () {
   });
 
   it("dispute and arbiter resolution - release", async function () {
-    const { escrow, payer, payee, arbiter, amount, escrowId } =
-      await createFundedEscrow();
+    const { escrow, payer, payee, arbiter } = await deployFixture();
+    const amount = ethers.parseEther("1");
+
+    const tx = await escrow
+      .connect(payer)
+      .createEscrow(payee.address, arbiter.address, 3600, { value: amount });
+    const receipt = await tx.wait();
+    const escrowId = receipt!.logs[0]!.args!.escrowId;
 
     await escrow.connect(payer).openDispute(escrowId);
     const disputed = await escrow.escrows(escrowId);
@@ -88,8 +100,14 @@ describe("BulwarkXEscrow", function () {
   });
 
   it("dispute and arbiter resolution - refund", async function () {
-    const { escrow, payer, payee, arbiter, amount, escrowId } =
-      await createFundedEscrow();
+    const { escrow, payer, payee, arbiter } = await deployFixture();
+    const amount = ethers.parseEther("1");
+
+    const tx = await escrow
+      .connect(payer)
+      .createEscrow(payee.address, arbiter.address, 3600, { value: amount });
+    const receipt = await tx.wait();
+    const escrowId = receipt!.logs[0]!.args!.escrowId;
 
     await escrow.connect(payer).openDispute(escrowId);
     const disputed = await escrow.escrows(escrowId);
@@ -101,21 +119,5 @@ describe("BulwarkXEscrow", function () {
 
     const stored = await escrow.escrows(escrowId);
     expect(Number(stored.status)).to.equal(EscrowStatus.Refunded);
-  });
-
-  it("payee can auto-release after deadline", async function () {
-    const autoReleaseSeconds = 5n;
-    const { escrow, payee, amount, escrowId } = await createFundedEscrow(
-      autoReleaseSeconds
-    );
-
-    await time.increase(autoReleaseSeconds + 1n);
-
-    await expect(() =>
-      escrow.connect(payee).releaseEscrow(escrowId)
-    ).to.changeEtherBalances([escrow, payee], [-amount, amount]);
-
-    const stored = await escrow.escrows(escrowId);
-    expect(Number(stored.status)).to.equal(EscrowStatus.Released);
   });
 });

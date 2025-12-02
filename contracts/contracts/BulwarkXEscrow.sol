@@ -64,7 +64,6 @@ contract BulwarkXEscrow {
         );
 
         Escrow storage escrow = escrows[escrowId];
-        require(escrow.status == EscrowStatus.Uninitialized, "escrow exists");
         escrow.payer = msg.sender;
         escrow.payee = _payee;
         escrow.arbiter = _arbiter;
@@ -93,20 +92,20 @@ contract BulwarkXEscrow {
             escrow.status != EscrowStatus.Uninitialized,
             "escrow not found"
         );
-        if (escrow.status == EscrowStatus.Disputed) {
-            require(msg.sender == escrow.arbiter, "only arbiter");
-        } else {
-            require(escrow.status == EscrowStatus.Funded, "not releasable");
-            if (msg.sender == escrow.payer) {
-                // payer is always allowed
-            } else if (msg.sender == escrow.payee) {
-                require(
-                    block.timestamp >= escrow.autoReleaseAt,
-                    "auto release not reached"
-                );
-            } else {
-                revert("not authorized");
-            }
+        require(
+            escrow.status == EscrowStatus.Funded ||
+                (escrow.status == EscrowStatus.Disputed &&
+                    msg.sender == escrow.arbiter),
+            "cannot release"
+        );
+
+        if (escrow.status == EscrowStatus.Funded) {
+            require(
+                msg.sender == escrow.payer ||
+                    (msg.sender == escrow.payee &&
+                        block.timestamp >= escrow.autoReleaseAt),
+                "not authorized"
+            );
         }
 
         escrow.status = EscrowStatus.Released;
@@ -123,10 +122,14 @@ contract BulwarkXEscrow {
             escrow.status != EscrowStatus.Uninitialized,
             "escrow not found"
         );
-        if (escrow.status == EscrowStatus.Disputed) {
-            require(msg.sender == escrow.arbiter, "only arbiter");
-        } else {
-            require(escrow.status == EscrowStatus.Funded, "not refundable");
+        require(
+            escrow.status == EscrowStatus.Funded ||
+                (escrow.status == EscrowStatus.Disputed &&
+                    msg.sender == escrow.arbiter),
+            "cannot refund"
+        );
+
+        if (escrow.status == EscrowStatus.Funded) {
             require(msg.sender == escrow.payee, "not authorized");
         }
 
