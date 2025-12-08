@@ -1,11 +1,11 @@
 # BulwarkX Architecture
 
-BulwarkX centers around the `BulwarkXEscrow` smart contract, which now supports native ETH (address(0)) and ERC-20 tokens through SafeERC20 helpers. Hardhat is configured for Ethereum (mainnet/Sepolia), Base (mainnet/Sepolia), Polygon Amoy, BNB Testnet, Arbitrum Sepolia, and Optimism Sepolia so deployments can target multiple ecosystems. The included deploy script can be pointed at any configured network, and env samples list the required RPC URLs and private key slot.
+## Overview
+BulwarkX is built around the `BulwarkXEscrow` smart contract deployed to EVM networks, including Base Sepolia for testnet flows and Base Mainnet for production. The contract enforces the escrow lifecycle between payer, payee, and arbiter.
 
-A TypeScript processor service (Express + ethers v6) connects to the contract using RPC, exposes `/escrow/create`, `/escrow/release`, `/escrow/refund`, and `/escrow/status/:id`, and persists lightweight metadata in memory. The backend API mounts `/api/invoices` and `/api/escrows`, creates off-chain invoices, and forwards escrow creation to the processor while returning the resulting escrowId/txHash to plugins.
+## Services
+- **Processor** (TypeScript/Express): connects directly to the blockchain via configured RPC (`RPC_URL`/`PRIVATE_KEY`) and interacts with the `BulwarkXEscrow` contract (`ESCROW_CONTRACT`). It exposes HTTP endpoints such as `/escrow/create` and `/escrow/status/:id` that wrap contract calls.
+- **Backend API**: serves business endpoints (e.g., `/api/invoices`) and forwards escrow-related actions to the processor service. Invoice creation creates an off-chain record and requests the processor to open a corresponding on-chain escrow.
+- **Plugins**: e-commerce integrations (OpenCart / PrestaShop / WooCommerce) communicate with the backend API to create invoices and read escrow status.
 
-For broader interoperability, the repo also includes:
-- An Anchor-based Solana program template (`solana-program/`) defining a simple escrow state account with initialize/release/refund flows.
-- A TronWeb processor scaffold (`tron-processor/`) that seeds config, health checks, and a placeholder escrow creation endpoint ready to be wired to a deployed Tron contract.
-
-Plugins (e.g., OpenCart, PrestaShop) integrate with the backend to originate escrows, and can target Base or other EVM chains by adjusting processor/backend RPC configuration and token selection per invoice.
+Hardhat network entries for Base Sepolia and Base Mainnet, plus processor RPC configuration, enable deployments and testing on Base networks.

@@ -6,9 +6,9 @@ const router = express.Router();
 
 router.post("/", async (req, res) => {
   try {
-    const { payeeAddress, arbiterAddress, autoReleaseSeconds, amountEth, amountTokenWei, tokenAddress, tokenSymbol, callbackUrl, payerAddress } = req.body || {};
+    const { payeeAddress, arbiterAddress, autoReleaseSeconds, amountEth, callbackUrl, payerAddress } = req.body || {};
 
-    if (!payeeAddress || !arbiterAddress) {
+    if (!payeeAddress || !arbiterAddress || !amountEth) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -20,10 +20,7 @@ router.post("/", async (req, res) => {
       payeeAddress,
       arbiterAddress,
       autoReleaseSeconds: Number(autoReleaseSeconds ?? 0),
-      amountEth: amountEth ? String(amountEth) : undefined,
-      amountTokenWei: amountTokenWei ? String(amountTokenWei) : undefined,
-      tokenAddress,
-      tokenSymbol,
+      amountEth: String(amountEth),
       callbackUrl,
       payerAddress,
     });
@@ -35,12 +32,9 @@ router.post("/", async (req, res) => {
         payee: payeeAddress,
         arbiter: arbiterAddress,
         amountEth,
-        amountTokenWei,
-        tokenAddress,
         orderId: invoice.id,
         callbackUrl,
         payerAddress,
-        autoReleaseSeconds,
       });
 
       const { escrowId, txHash } = escrowResponse.data || {};
@@ -52,7 +46,6 @@ router.post("/", async (req, res) => {
         txHash,
         paymentUrl: escrowId ? `https://pay.bulwarkx.local/escrow/${escrowId}` : null,
         network: "base-sepolia",
-        tokenSymbol: tokenSymbol || (tokenAddress ? "ERC20" : "ETH"),
       });
     } catch (processorError) {
       console.error("Error creating escrow via processor", processorError);
