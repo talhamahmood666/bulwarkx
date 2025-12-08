@@ -8,20 +8,48 @@ const router = express.Router();
 
 router.post('/', async (req, res) => {
   try {
-    const { payee, arbiter, amountEth, orderId, callbackUrl, payerAddress } = req.body || {};
+    const { payee, arbiter, amountEth, amountTokenWei, tokenAddress, orderId, callbackUrl, payerAddress, autoReleaseSeconds } = req.body || {};
 
-    if (!payee || !arbiter || !amountEth) {
-      return res.status(400).json({ success: false, error: 'payee, arbiter, and amountEth are required' });
+    if (!payee || !arbiter) {
+      return res.status(400).json({ success: false, error: 'payee and arbiter are required' });
+    }
+
+    const usingNative = !tokenAddress;
+    const amountValue = usingNative ? amountEth : amountTokenWei;
+
+    if (!amountValue) {
+      return res.status(400).json({ success: false, error: 'amount is required' });
     }
 
     const offchainRef = uuidv4();
-    const nextIdBigInt: bigint = await escrowContract.nextEscrowId();
-    const escrowId = Number(nextIdBigInt);
 
-    const tx = await escrowContract.createEscrow(payee, arbiter, offchainRef, {
-      value: ethers.parseEther(String(amountEth))
-    });
-    const receipt = await tx.wait();
+    let tx;
+    let receipt;
+    let escrowId: string = '';
+    const autoRelease = Number(autoReleaseSeconds ?? 3600);
+
+    if (usingNative) {
+      tx = await escrowContract.createEscrow(payee, arbiter, autoRelease, {
+        value: ethers.parseEther(String(amountValue))
+      });
+      receipt = await tx.wait();
+    } else {
+      const parsedAmount = BigInt(amountValue);
+      tx = await escrowContract.createEscrowToken(tokenAddress, payee, arbiter, parsedAmount, autoRelease);
+      receipt = await tx.wait();
+    }
+
+    const createdEvent = receipt?.logs
+      ?.map((log: any) => {
+        try {
+          return escrowContract.interface.parseLog(log);
+        } catch (err) {
+          return null;
+        }
+      })
+      .find((parsed: any) => parsed && parsed.name === 'EscrowCreated');
+
+    escrowId = createdEvent?.args?.escrowId || '';
 
     const record: EscrowRecord = {
       id: escrowId,
@@ -31,7 +59,9 @@ router.post('/', async (req, res) => {
       payerAddress,
       payeeAddress: payee,
       arbiterAddress: arbiter,
-      amountEth: String(amountEth),
+      tokenAddress: tokenAddress || undefined,
+      amount: String(amountValue),
+      isNative: usingNative,
       status: 'onchain_open',
       txHash: receipt?.hash || tx.hash
     };

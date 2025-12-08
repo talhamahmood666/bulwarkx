@@ -1,0 +1,5 @@
+[workspace]
+members = [
+    "programs/bulwarkx-escrow"
+]
+resolver = "2"

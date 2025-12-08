@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import invoicesRouter from "./routes/invoices";
+import escrowsRouter from "./routes/escrows";
 
 dotenv.config();
 
@@ -12,11 +14,8 @@ app.get("/health", (_req, res) => {
   res.json({ status: "ok", service: "bulwarkx-backend" });
 });
 
-// TODO: mount invoices and escrows routes here, e.g.:
-// import invoiceRoutes from "./routes/invoices";
-// import escrowRoutes from "./routes/escrows";
-// app.use("/api/invoices", invoiceRoutes);
-// app.use("/api/escrows", escrowRoutes);
+app.use("/api/invoices", invoicesRouter);
+app.use("/api/escrows", escrowsRouter);
 
 const port = process.env.PORT || 4000;
 app.listen(port, () => {
