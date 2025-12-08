@@ -12,6 +12,10 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
+    if (!amountEth && !amountTokenWei) {
+      return res.status(400).json({ error: "Either amountEth or amountTokenWei required" });
+    }
+
     const invoice = createInvoice({
       payeeAddress,
       arbiterAddress,

@@ -1,4 +1,4 @@
-# BulwarkX – System Architecture
+# BulwarkX Architecture
 
 ## Overview
 BulwarkX is built around the `BulwarkXEscrow` smart contract deployed to EVM networks, including Base Sepolia for testnet flows and Base Mainnet for production. The contract enforces the escrow lifecycle between payer, payee, and arbiter.

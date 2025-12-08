@@ -120,4 +120,39 @@ describe("BulwarkXEscrow", function () {
     const stored = await escrow.escrows(escrowId);
     expect(Number(stored.status)).to.equal(EscrowStatus.Refunded);
   });
+
+  it("supports ERC20 token escrows", async function () {
+    const { payer, payee, arbiter } = await deployFixture();
+    const Token = await ethers.getContractFactory("MockToken");
+    const token = await Token.deploy("Mock USD", "MUSD", ethers.parseUnits("1000", 18));
+    await token.waitForDeployment();
+
+    const Escrow = await ethers.getContractFactory("BulwarkXEscrow");
+    const escrow = await Escrow.deploy();
+    await escrow.waitForDeployment();
+
+    const amount = ethers.parseUnits("50", 18);
+    await token.connect(payer).approve(await escrow.getAddress(), amount);
+
+    const tx = await escrow
+      .connect(payer)
+      .createEscrowToken(
+        await token.getAddress(),
+        payee.address,
+        arbiter.address,
+        amount,
+        7200
+      );
+
+    const receipt = await tx.wait();
+    const escrowId = receipt!.logs[0]!.args!.escrowId;
+
+    const stored = await escrow.escrows(escrowId);
+    expect(stored.token).to.equal(await token.getAddress());
+    expect(stored.amount).to.equal(amount);
+
+    await escrow.connect(payer).releaseEscrow(escrowId);
+    const payeeBalance = await token.balanceOf(payee.address);
+    expect(payeeBalance).to.equal(amount);
+  });
 });

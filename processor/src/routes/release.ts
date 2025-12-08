@@ -7,23 +7,23 @@ const router = express.Router();
 router.post('/', async (req, res) => {
   try {
     const { escrowId } = req.body || {};
-    if (escrowId === undefined || escrowId === null) {
+    if (!escrowId) {
       return res.status(400).json({ success: false, error: 'escrowId is required' });
     }
 
-    const record = escrowStore.get(Number(escrowId));
+    const record = escrowStore.get(String(escrowId));
     if (!record) {
       return res.status(404).json({ success: false, error: 'Escrow not found' });
     }
 
-    const tx = await escrowContract.releaseToPayee(escrowId);
+    const tx = await escrowContract.releaseEscrow(escrowId);
     const receipt = await tx.wait();
 
     record.status = 'released';
     record.txHash = receipt?.hash || tx.hash;
-    escrowStore.set(Number(escrowId), record);
+    escrowStore.set(String(escrowId), record);
 
-    return res.json({ success: true, escrowId: Number(escrowId), txHash: record.txHash });
+    return res.json({ success: true, escrowId, txHash: record.txHash });
   } catch (error: any) {
     // eslint-disable-next-line no-console
     console.error('release escrow error', error);

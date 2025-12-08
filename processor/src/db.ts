@@ -1,16 +1,18 @@
 export type EscrowStatus = 'onchain_open' | 'released' | 'refunded';
 
 export interface EscrowRecord {
-  id: number;
+  id: string;
   offchainRef: string;
   orderId?: string;
   callbackUrl?: string;
   payerAddress?: string;
   payeeAddress: string;
   arbiterAddress: string;
-  amountEth: string;
+  tokenAddress?: string;
+  amount: string;
+  isNative: boolean;
   status: EscrowStatus;
   txHash?: string;
 }
 
-export const escrowStore: Map<number, EscrowRecord> = new Map();
+export const escrowStore: Map<string, EscrowRecord> = new Map();
