@@ -8,15 +8,27 @@ function generateId(prefix = "inv") {
   return `${prefix}_${timestamp}_${randomPart}`;
 }
 
-export function createInvoice(data: Omit<Invoice, "id" | "status" | "escrowId">) {
+export function createInvoice(data: Omit<Invoice, "id" | "status" | "escrowId" | "txHash">) {
   const id = generateId();
-  const escrowId = `escrow_${id}`;
   const invoice: Invoice = {
     id,
-    escrowId,
     status: "created",
     ...data,
   };
+
+  invoices.set(id, invoice);
+  return invoice;
+}
+
+export function attachEscrowDetails(id: string, details: { escrowId?: string; txHash?: string }) {
+  const invoice = invoices.get(id);
+
+  if (!invoice) {
+    return undefined;
+  }
+
+  invoice.escrowId = details.escrowId ?? invoice.escrowId;
+  invoice.txHash = details.txHash ?? invoice.txHash;
 
   invoices.set(id, invoice);
   return invoice;

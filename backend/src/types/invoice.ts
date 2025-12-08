@@ -11,6 +11,9 @@ export interface Invoice {
   arbiterAddress: string;
   autoReleaseSeconds: number;
   amountEth: string;
+  payerAddress?: string;
+  callbackUrl?: string;
   escrowId?: string;
+  txHash?: string;
   status: InvoiceStatus;
 }
