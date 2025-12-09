@@ -258,19 +258,14 @@ Reputation scoring
 
 Incentive-slashing for dishonest rulings
 
-🧪 Testing
+🧪 Testing (Base-focused)
 
-Run tests:
+Run contract and processor tests locally:
 
-npx hardhat test
+- `cd contracts && npx hardhat test`
+- `cd processor && npm test`
 
-
-If you get:
-
-createEscrow is not a function
-
-
-➡ Means ABI mismatch — recompile before running tests.
+See `docs/testing-checklist-base.md` for the detailed Base coverage list.
 
 📐 Architecture Diagram
 Customer → Website → BulwarkX Processor → Blockchain (Escrow Contract)
