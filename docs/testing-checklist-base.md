@@ -1,20 +1,22 @@
-# Base Testing Checklist
+# BulwarkX – Base Testing Checklist
 
-## Smart Contract – Hardhat (Base-focused)
-- [ ] Create escrow with native token (Base ETH)
-- [ ] Create escrow with ERC20 token (e.g., USDC/USDT)
-- [ ] Release escrow to payee (payer/authorized path)
-- [ ] Refund escrow to payer (arbiter/payee path)
-- [ ] Unauthorized release/refund attempts revert
-- [ ] Edge cases revert (zero amount, bad escrowId, double release/refund)
+## Smart Contracts (Hardhat – /contracts)
 
-## Processor – Jest
-- [ ] Correct chain selection (Base, Ethereum, BSC) via env config
-- [ ] Escrow creation uses correct contract + arguments
-- [ ] Release/refund call the correct chain contract functions
-- [ ] RPC/contract errors handled gracefully without crashes
+- [x] Compile contracts with Hardhat
+- [x] Create escrow with native token (Base ETH)
+- [x] Create escrow with ERC20 token (USDT/USDC-style)
+- [x] Release escrow to payee (happy path)
+- [x] Refund escrow to payer (dispute / cancel)
+- [x] Dispute + arbiter resolution (release)
+- [x] Dispute + arbiter resolution (refund)
+- [x] Prevent unauthorized release/refund
+- [x] Reject zero-amount escrows
+- [x] Reject non-existent escrow IDs
+- [x] Prevent double-release / double-refund
 
-## End-to-End (manual outline)
-- [ ] Buyer checkout funds escrow on Base Sepolia
-- [ ] Merchant releases escrow and payee receives funds
-- [ ] Dispute triggers refund flow and payer receives funds
+**Run:**
+
+```bash
+cd contracts
+npx hardhat test
+```
