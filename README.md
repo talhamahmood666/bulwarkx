@@ -1,290 +1,298 @@
-⭐ BulwarkX – The Non-Custodial Escrow Layer for Global Commerce
-Secure. Decentralized. Trust-Minimized Payments for the Internet.
+🚧 BulwarkX – Universal Non-Custodial Escrow Protocol
+Multi-Chain Crypto Escrow for E-Commerce, Marketplaces & Payment Infrastructure
 
-BulwarkX is a non-custodial crypto escrow protocol built for e-commerce platforms, marketplaces, and peer-to-peer transactions.
-It enables trustless payments, zero-custody fund locking, instant release, and a decentralized Arbitrator Network for global dispute resolution.
+Supports: Ethereum • Base • BNB Chain • Polygon • Avalanche • Arbitrum • Optimism • Solana • Tron
 
-BulwarkX bridges Web2 commerce with Web3 security through smart contracts, APIs, and plug-and-play plugins for online stores.
+🧩 Overview
 
-🔥 Why BulwarkX Exists
-The Problem
+BulwarkX is a trustless, non-custodial escrow protocol designed for e-commerce platforms, merchants, freelancers, agencies, and marketplaces. It allows buyers and sellers to transact safely using cryptocurrency, with disputes resolved by a decentralized Bulwark Arbitrator Network.
 
-Today’s online buyers and sellers face:
+BulwarkX integrates directly into:
 
-Fraud & scams
+🛒 OpenCart
 
-Payment reversals
+🛒 WooCommerce / WordPress
 
-Chargebacks
+🛒 Shopify (coming soon)
 
-Fake buyers & dishonest merchants
+📦 Custom payment flows via API
 
-Trust barriers in cross-border transactions
+🌐 Multichain Support
+Chain	Status	Native + Tokens
+Base	✅ Live	ETH, USDC
+Ethereum	✅ Live	ETH, USDT, USDC
+BNB Chain	✅ Live	BNB, BUSD, ERC20
+Polygon	Ready	MATIC, USDC
+Arbitrum / Optimism	Ready	ETH, ERC20
+Avalanche	Ready	AVAX
+Solana	Beta	SPL escrow program (Anchor)
+Tron	Beta	TRX + TRC20 escrow via TronWeb
+🔐 Smart Contract Features
+EVM Escrow (Solidity)
 
-Traditional escrow is:
+createEscrow(address payee, address token, uint256 amount)
 
-Slow
+release(uint256 escrowId)
 
-Expensive (3–10% fees)
+refund(uint256 escrowId)
 
-Manual
+Supports:
 
-Centralized
+ETH / native tokens
 
-Limited to local jurisdictions
+ERC20: USDT, USDC
 
-The Solution
+Immutable escrow records
 
-BulwarkX is a trustless, global, decentralized escrow protocol that eliminates middlemen, cuts costs, and allows commerce to happen securely anywhere in the world.
+Arbitrator override logic
 
-🚀 Core Features
-🔒 Non-Custodial Smart Contract Escrow
+Event-driven processor indexing
 
-Funds are locked on-chain — no company or server ever holds user funds.
+Solana Escrow (Anchor Program)
 
-⚖️ Bulwark Arbitrator Network
+PDA-based vault authority
 
-A decentralized pool of reputation-based arbiters resolves disputes and earns fees.
+SPL token support
 
-🛒 E-Commerce Plugins
+On-chain dispute state machine
 
-Official plugins for:
+Fast settlement (<1s finality)
 
-OpenCart (Plisio integration)
+Tron Escrow (TronWeb Node Service)
 
-Shopify
+TRX & TRC20 supported
 
-WooCommerce
+Signed transactions via merchant node
 
-🔗 REST API + Webhooks
+Escrow stored in a vault contract
 
-Developers can integrate BulwarkX into any platform with:
-
-Escrow creation
-
-Payment verification
-
-Event callbacks
-
-Release/refund actions
-
-⚡ Instant Release Mechanism
-
-Payments unlock instantly when conditions are met.
-
-🧱 Built for Developers
-
-Hardhat
-
-Solidity
-
-TypeScript
-
-GitHub Codespaces + Codex
-
-Modular architecture
-
-Clean deployment scripts
-
-📊 Market Opportunity
-
-Global e-commerce: $6.3 trillion
-
-Global freelancer economy: 1.5 billion workers
-
-P2P crypto trading: $1.1 trillion annually
-
-Web3 commercial transactions increasing rapidly
-
-Escrow is still stuck in Web2.
-BulwarkX is building the Web3 escrow standard.
-
-🧱 Project Architecture
+🧱 Repository Structure
 bulwarkx/
+│── contracts/
+│   ├── evm/
+│   │    └── BulwarkXEscrow.sol
+│   ├── solana/
+│   │    └── programs/bulwarkx_escrow/
+│   └── tron/
+│        └── BulwarkXTronEscrow.sol
 │
-├── contracts/                # Solidity smart contracts for escrow & arbitrators
-├── backend/                  # Node.js API, event listeners, merchant callbacks
-├── processor/                # Crypto payment processor logic
-├── dashboard/                # Merchant dashboard for managing escrows
-├── plugins/                  # E-commerce integrations (OpenCart, Shopify, WooCommerce)
+│── processor/
+│   ├── src/
+│   │   ├── chains/
+│   │   │   ├── evm.ts
+│   │   │   ├── solana.ts
+│   │   │   └── tron.ts
+│   │   ├── routes/
+│   │   │   ├── invoice.routes.ts
+│   │   │   └── escrow.routes.ts
+│   │   ├── services/
+│   │   │   ├── escrow.service.ts
+│   │   │   └── invoice.service.ts
+│   │   └── index.ts
+│   └── package.json
 │
-├── tests/                    # Hardhat + TypeScript test suite
-├── scripts/                  # Deployment scripts
+│── plugins/
+│   ├── opencart/
+│   └── woocommerce/
+│
+│── docs/
+│   ├── architecture.md
+│   ├── api.md
+│   ├── arbitrator-network.md
+│   └── deployment.md
+│
 └── README.md
 
-🔧 Tech Stack
-
-Ethereum / Base / EVM Chains
-
-Solidity (smart contracts)
-
-Node.js (backend API)
-
-TypeScript
-
-Hardhat
-
-GitHub Codespaces (cloud development)
-
-Codex (GitHub AI coding integration)
-
-🛠 Installation (Developers)
-1. Clone Repo
-git clone https://github.com/talhamahmood666/bulwarkx
+🧰 Installation
+1. Clone the repo
+git clone https://github.com/<your>/bulwarkx.git
 cd bulwarkx
 
-2. Install Dependencies
+2. Install Hardhat dependencies
+cd contracts/evm
 npm install
 
-3. Compile Contracts
-npx hardhat compile
-
-4. Run Tests
-npx hardhat test
-
-5. Start Local Blockchain
-npx hardhat node
-
-6. Deploy to Base Testnet
-npx hardhat run scripts/deploy.ts --network base
+3. Install processor dependencies
+cd ../../processor
+npm install
 
 ⚙️ Environment Variables
 
-Create a .env file:
+Create .env inside /processor:
 
-PRIVATE_KEY=
-BASE_RPC=
-ETHERSCAN_API_KEY=
-WEBHOOK_SECRET=
+# --- BASE ---
+BASE_RPC_URL=
+BASE_PRIVATE_KEY=
+BASE_ESCROW_ADDRESS=
+
+# --- ETHEREUM ---
+ETH_RPC_URL=
+ETH_PRIVATE_KEY=
+ETH_ESCROW_ADDRESS=
+
+# --- BNB CHAIN ---
+BSC_RPC_URL=
+BSC_PRIVATE_KEY=
+BSC_ESCROW_ADDRESS=
+
+# --- SOLANA ---
+SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
+SOLANA_KEYPAIR=./keys/solana.json
+
+# --- TRON ---
+TRON_PRIVATE_KEY=
+TRON_FULLNODE=https://api.trongrid.io
+TRON_ESCROW_ADDRESS=
+
+# --- BACKEND ---
+PORT=8080
 DATABASE_URL=
-PORT=3001
 
-📦 Escrow Contract Usage
-Create an Escrow
-createEscrow(payer, payee, arbiter, amount, metadataURI);
+🚀 Deploying EVM Contracts
+Compile
+npx hardhat compile
 
-Release Funds
-releaseEscrow(escrowId);
+Deploy to Base Sepolia:
+npx hardhat run scripts/deploy.ts --network baseSepolia
 
-Refund to Payer (Arbiter Only)
-refundPayer(escrowId);
+Deploy to Ethereum:
+npx hardhat run scripts/deploy.ts --network ethereum
 
-⚖️ Bulwark Arbitrator Network
+Deploy to BNB Chain:
+npx hardhat run scripts/deploy.ts --network bsc
 
-Arbiters:
 
-Stake tokens
+After deployment, update .env with the new escrow contract addresses.
 
-Get randomly assigned disputes
+⚡ Deploying Solana (Anchor)
+Build
+cd contracts/solana
+anchor build
 
-Vote on outcomes
+Deploy
+anchor deploy
 
-Earn fees per resolution
 
-Lose stake for dishonest ruling
+Store the program ID inside .env:
 
-Build reputation on-chain
+SOLANA_PROGRAM_ID=
 
-Contracts include:
+⚡ Deploying Tron
 
-Arbiter registration
+TronWeb contract deployment script:
 
-Staking
+node scripts/deployTron.js
+
+
+Update:
+
+TRON_ESCROW_ADDRESS=
+
+🏗️ Processor API Endpoints
+Create Invoice
+POST /api/invoice/create
+{
+  "orderId": "123",
+  "amount": "49.99",
+  "currency": "USDT",
+  "chain": "base"
+}
+
+Create Escrow
+POST /api/escrow/create
+{
+  "orderId": "123",
+  "payee": "0xabc...",
+  "token": "0xUSDT...",
+  "amount": 1000000,
+  "chain": "ethereum"
+}
+
+Release Escrow
+POST /api/escrow/release
+
+Refund Escrow
+POST /api/escrow/refund
+
+
+Documentation: docs/api.md
+
+🛒 E-commerce Integrations
+OpenCart Plugin Flow
+
+Customer selects BulwarkX Crypto Escrow
+
+Order sent to processor
+
+Processor generates:
+
+Plisio invoice
+
+On-chain BulwarkX escrow
+
+Customer pays
+
+Escrow locked
+
+Merchant releases funds when satisfied
+
+WooCommerce Plugin Flow
+
+Identical flow using WP REST hooks.
+
+🛡️ Bulwark Arbitrator Network
+
+Full design in docs/arbitrator-network.md:
+
+Arbitrators stake $BULWARK tokens
+
+They earn:
+
+dispute fees
+
+arbitration rewards
+
+Multi-sig controlled appeals
 
 Reputation scoring
 
-Dispute decision execution
+Incentive-slashing for dishonest rulings
 
-🌐 E-Commerce Integrations
-Supported Platforms
+🧪 Testing
 
-OpenCart (via Plisio)
+Run tests:
 
-Shopify
-
-WooCommerce
-
-Custom Webhooks & APIs
-
-Create Escrow Invoice (API)
-POST /api/create-escrow
-
-Webhook Example
-{
-  "escrowId": 12,
-  "status": "released",
-  "amount": "0.35 ETH",
-  "txHash": "0xabc..."
-}
-
-🔐 Security
-
-Fully non-custodial
-
-Immutable smart contract logic
-
-No server ever stores private keys
-
-Event-driven dispute system
-
-Signed webhooks
-
-Arbiter slashing & staking
-
-🗺 Roadmap
-Q1 2026
-
-Base Mainnet Launch
-
-Arbitrator Network Alpha
-
-Merchant Dashboard v1
-
-Q2 2026
-
-Shopify Plugin
-
-WooCommerce Plugin
-
-Dispute Analytics
-
-Q3 2026
-
-On-chain Arbiter Reputation Engine
-
-Multi-chain support (ETH / Arbitrum / Base / Polygon/ Solana/ Kaspa/ BNB)
-
-# 🤝 Contributing
-This repository is private.  
-External contributions are currently restricted.  
-Please email bulwarkx@proton.me for collaboration inquiries.
+npx hardhat test
 
 
-Open issues for:
+If you get:
 
-Smart contract bugs
+createEscrow is not a function
 
-Plugin requests
 
-Docs improvements
+➡ Means ABI mismatch — recompile before running tests.
 
-🏆 Designed For
+📐 Architecture Diagram
+Customer → Website → BulwarkX Processor → Blockchain (Escrow Contract)
+                      ↓
+                 Database (Invoices, Escrows)
+                      ↓
+               Merchant Dashboard
 
-Developers
 
-Online marketplaces
+Multichain flow:
 
-E-commerce platforms
+Processor
+ ├── EVM (ethers.js)
+ ├── Solana (Anchor + web3.js)
+ └── Tron (TronWeb)
 
-Freelancers
+📹 Demo Video
 
-Web3 startups
+Upload 1-minute demo → link in Base Grant form:
 
-Payment processors
+docs/demo.mp4
 
-Investors & Grant Foundations
+🧾 License
 
-📬 Contact
-BulwarkX Team
-bulwarkx@proton.me
-twitter.com/Bulwark_X
+MIT License © BulwarkX
