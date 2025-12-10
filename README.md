@@ -68,8 +68,6 @@ Reasons for choosing Base:
 
 0xCa97AEAA6055cbA49D8626Ec44eE447c54c43f37
 
-yaml
-Copy code
 
 Explorer:  
 https://sepolia.basescan.org/address/0xCa97AEAA6055cbA49D8626Ec44eE447c54c43f37
@@ -134,67 +132,63 @@ Jest tests verify:
 
 ## 8. Developer Setup
 
-### Install
-```bash
+Install
 cd contracts
 npm install
+
 Compile
-bash
-Copy code
 npx hardhat compile
+
 Test Contracts
-bash
-Copy code
 npx hardhat test
+
 Test Processor
-bash
-Copy code
 cd ../processor
 npm install
 npm test
-9. Deploy to Any Chain
+
+## 9. Deploy (Any Chain)
 Configure .env
-ini
-Copy code
 RPC_URL=<rpc>
 DEPLOYER_PRIVATE_KEY=<private_key>
+
 Deploy
-bash
-Copy code
 npx hardhat run scripts/deploy-bulwarkx.ts --network <chain>
-10. Roadmap
+
+## 10. Roadmap
 Phase 1 – Base
+
 Testnet + mainnet launch
 
 Merchant dashboard
 
 Shopify + WooCommerce plugins
 
-Phase 2 – Multichain
+Phase 2 – Multichain Expansion
+
 Deploy to Ethereum, BNB, Polygon, Optimism
 
-Stablecoin support
+Stablecoin support (USDC, USDT)
 
 Fiat on/off-ramp integrations
 
-Phase 3 – Arbitrator Network
+Phase 3 – Global Arbitrator Network
+
 Reputation system
 
 Delegated resolution markets
 
-Tokenized arbitrator staking
+Tokenized staking for arbitrators
 
-11. Vision
-BulwarkX becomes the default escrow infrastructure for the onchain economy across multiple chains and ecosystems.
+## 11. Vision
 
-12. License
+BulwarkX becomes the default escrow infrastructure for the onchain economy.
+
+Across all chains.
+Across all use cases.
+Fully open-source.
+Fully decentralized.
+
+## 12. License
+
 MIT
-
-[END README]
-
-yaml
-Copy code
-
----
-
-Paste this into Codex → it will **fully replace your README with the multichain version**.
