@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "build": "hardhat compile",
-    "test": "hardhat test"
+    "test": "hardhat test",
+    "deploy:base-sepolia": "hardhat run scripts/deploy-bulwarkx.ts --network baseSepolia"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
