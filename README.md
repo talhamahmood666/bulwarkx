@@ -156,7 +156,7 @@ Deploy
 npx hardhat run scripts/deploy-bulwarkx.ts --network <chain>
 
 ## 10. Roadmap
-Phase 1 – Base
+# Phase 1 – Base
 
 Testnet + mainnet launch
 
@@ -164,7 +164,7 @@ Merchant dashboard
 
 Shopify + WooCommerce plugins
 
-Phase 2 – Multichain Expansion
+# Phase 2 – Multichain Expansion
 
 Deploy to Ethereum, BNB, Polygon, Optimism
 
@@ -172,7 +172,7 @@ Stablecoin support (USDC, USDT)
 
 Fiat on/off-ramp integrations
 
-Phase 3 – Global Arbitrator Network
+# Phase 3 – Global Arbitrator Network
 
 Reputation system
 
