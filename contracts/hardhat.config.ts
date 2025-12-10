@@ -4,6 +4,12 @@ import "@nomicfoundation/hardhat-toolbox";
 
 dotenv.config();
 
+const {
+  BASE_SEPOLIA_RPC_URL,
+  BASE_MAINNET_RPC_URL,
+  DEPLOYER_PRIVATE_KEY,
+} = process.env;
+
 const config: HardhatUserConfig = {
   solidity: {
     version: "0.8.24",
@@ -15,16 +21,15 @@ const config: HardhatUserConfig = {
     }
   },
   networks: {
-    // TODO: fill testnets later (Sepolia, Polygon Amoy, etc.)
     baseSepolia: {
-      url: process.env.BASE_SEPOLIA_RPC_URL || "https://sepolia.base.org",
+      url: BASE_SEPOLIA_RPC_URL || "https://sepolia.base.org",
       chainId: 84532,
-      accounts: process.env.DEPLOYER_PRIVATE_KEY ? [process.env.DEPLOYER_PRIVATE_KEY] : [],
+      accounts: DEPLOYER_PRIVATE_KEY ? [DEPLOYER_PRIVATE_KEY] : [],
     },
     baseMainnet: {
-      url: process.env.BASE_MAINNET_RPC_URL || "https://mainnet.base.org",
+      url: BASE_MAINNET_RPC_URL || "https://mainnet.base.org",
       chainId: 8453,
-      accounts: process.env.DEPLOYER_PRIVATE_KEY ? [process.env.DEPLOYER_PRIVATE_KEY] : [],
+      accounts: DEPLOYER_PRIVATE_KEY ? [DEPLOYER_PRIVATE_KEY] : [],
     },
   }
 };
