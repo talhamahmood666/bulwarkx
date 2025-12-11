@@ -1,6 +1,6 @@
 # BulwarkX
 
-**Tagline:** Escrow Without Custody. Commerce Without Fear.
+**Our Motto** Escrow Without Custody. Commerce Without Fear.
 
 BulwarkX is a **non-custodial, multi-chain escrow protocol and merchant SDK** designed for crypto commerce.  
 It lets buyers, sellers, and arbitrators coordinate trustlessly on-chain while funds remain in smart contracts the protocol does **not** control.
