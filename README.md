@@ -1,194 +1,292 @@
-# BulwarkX – Multichain Non-Custodial Escrow Protocol
+# BulwarkX
 
-BulwarkX is a chain-agnostic, non-custodial escrow settlement protocol designed to enable trust-minimized payments for ecommerce, freelancers, marketplaces, and onchain businesses.
+**Tagline:** Escrow Without Custody. Commerce Without Fear.
 
-It provides:
-- A clean and composable escrow smart contract  
-- Developer-friendly APIs  
-- E-commerce plugins (Shopify / WooCommerce)  
-- Automatic dispute → arbiter → release pipeline  
-- Support for any EVM chain  
+BulwarkX is a **non-custodial, multi-chain escrow protocol and merchant SDK** designed for crypto commerce.  
+It lets buyers, sellers, and arbitrators coordinate trustlessly on-chain while funds remain in smart contracts the protocol does **not** control.
 
-BulwarkX solves a global problem: **safe online transactions without middlemen**.
+> Built first for the Superchain (Base & Optimism), with a roadmap to expand across EVM chains and other ecosystems.
 
 ---
 
-## 1. Why BulwarkX?
+## 🧱 What BulwarkX Is
 
-Most online commerce relies on trusting payment intermediaries (PayPal, Stripe, marketplaces).  
-Crypto solves custody but not trust between buyer and seller.
+- **Non-custodial escrow protocol**  
+  Funds are locked in audited smart contracts; neither BulwarkX nor any centralized party can unilaterally take custody.
 
-BulwarkX provides:
-- Trustless escrow  
-- Dispute resolution  
-- Instant global settlement  
-- APIs for builders  
-- Multichain deployment  
+- **Merchant-first SDK & plugins**  
+  Drop-in integrations for ecommerce platforms (e.g. OpenCart, WooCommerce, custom stores) so merchants can accept crypto with escrow protection.
 
-It is designed to become the escrow layer for onchain commerce.
+- **Arbitrator network design**  
+  A pluggable “Bulwark Arbitrator Network” where vetted third-parties can resolve disputes and earn fees.
 
----
-
-## 2. Multichain Architecture
-
-Works on any EVM chain:
-
-### Supported today
-- Base  
-- Ethereum  
-- BNB Chain  
-- Polygon  
-- Avalanche  
-
-### Upcoming
-- Optimism  
-- Arbitrum  
-- Solana (via Anchor adapter)  
-- Tron (via wrapper processor)  
-
-Processor dynamically selects chains through a unified configuration.
+- **Grant-aligned public good**  
+  The protocol is designed as open infrastructure for safer on-chain commerce, aligned with the missions of Base, Optimism, and the broader Superchain.
 
 ---
 
-## 3. Optimized for Base (First Deployment)
+## 🏗 Repository Structure
 
-Base is the first chain where BulwarkX is fully deployed and tested end-to-end.
+> Note: The exact folders may differ slightly depending on the current state of the repo. This is the intended high-level layout.
 
-Reasons for choosing Base:
-- Low fees  
-- Coinbase-powered distribution  
-- Strong builder ecosystem  
-- Ideal for consumer payments  
+- `contracts/`  
+  Solidity smart contracts for the BulwarkX escrow protocol, written for Hardhat.  
+  - Core escrow contracts (e.g., `BulwarkXEscrow.sol`)  
+  - ERC20 support (USDT, USDC, & other tokens)  
+  - Deployment scripts and configuration
 
----
+- `processor/`  
+  Backend service (TypeScript/Node/Express) that:
+  - Talks to the escrow contracts on-chain  
+  - Exposes REST/webhook endpoints for ecommerce platforms  
+  - Persists invoice and escrow references in a database
 
-## 4. Deployment (Base Sepolia)
+- `dashboard/`  
+  Frontend (e.g., Next.js/React) for:  
+  - Viewing escrow status  
+  - Merchant configuration  
+  - Debugging and testnet demos
 
-**BulwarkXEscrow contract:**
+- `plugins/` or `integrations/`  
+  Platform-specific code such as:  
+  - OpenCart payment extension  
+  - WooCommerce plugin  
+  - Other merchant adapters
 
-0xCa97AEAA6055cbA49D8626Ec44eE447c54c43f37
-
-
-Explorer:  
-https://sepolia.basescan.org/address/0xCa97AEAA6055cbA49D8626Ec44eE447c54c43f37
-
-Upcoming deployments:
-- Ethereum testnet  
-- BNB Chain testnet  
-- Polygon Amoy  
-- Optimism Sepolia  
-
-Mainnet rollouts follow after audit.
-
----
-
-## 5. Escrow Lifecycle Demo (On-chain)
-
-### Escrow #1 – Create → Release  
-- Create: `0x158d30b3dbcde16b90bc915933be57f3224196cb44318611cf743f57e4862f68`  
-- Release: `0xd407fecbc130ff4ec22d80a06065c43ae1fd3a6f6aa80b808aa8a7438d3045ff`
-
-### Escrow #2 – Create → Refund  
-- Create2: `0xbf279d037769deaf243e2ec4d348890172e2f251a78bde5ee13ed7cadbc2e1f0`  
-- Refund: `0x9e93a97e8de83e5be51d87ea69f4b39411d3ac6c4461d94b6583076aa898a066`
-
-These transactions confirm core protocol functionality on Base.
+- `docs/`  
+  Additional documentation and architecture details.
 
 ---
 
-## 6. Contract Features
+## ✨ Key Features
 
-### Core
-- Create escrow with ETH or ERC20  
-- Auto-release timer  
-- Refund flow  
-- Arbiter-controlled disputes  
-- Immutable, non-custodial logic  
-
-### Planned
-- USDC / USDbC stablecoin vaults  
-- Multi-escrow batching  
-- Invoice linking  
-- zk-proof-based dispute outcomes  
+- **Non-custodial escrow for crypto payments**
+- **Atomic flows** between: buyer, merchant, arbitrator, and on-chain contracts
+- **Multi-asset support** (e.g., ERC20 stablecoins like USDT/USDC on Base/OP)
+- **Merchant SDK** for simplified integration
+- **Webhooks & invoice tracking** via the processor service
+- **Designed for grant programs & public-good ecosystems**
 
 ---
 
-## 7. Processor Backend
+## 🔗 Current Testnet Deployment
 
-Located in `/processor`.
+> Replace placeholders below with your actual deployed addresses & links.
 
-Provides:
-- REST API endpoints  
-- Chain selection  
-- Contract call abstraction  
-- Webhook callbacks  
+- **Network:** Base Sepolia  
+- **Escrow Contract:** `0x...`  
+- **Block Explorer:** https://sepolia.basescan.org/address/0x...  
+- **Example Tx:** https://sepolia.basescan.org/tx/0x...
 
-Jest tests verify:
-- Chain selection  
-- Escrow actions  
-- RPC error handling  
+This section should be updated as new testnets or mainnets are deployed.
 
 ---
 
-## 8. Developer Setup
+## 🚀 Getting Started (Local Dev)
 
-Install
-cd contracts
+### Prerequisites
+
+- Node.js (LTS)
+- pnpm or npm or yarn
+- Git
+- A testnet RPC endpoint (Base Sepolia, Optimism Sepolia, etc.)
+- A funded testnet wallet for deployments
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/your-org/bulwarkx.git
+cd bulwarkx
+2. Install dependencies
+If you are using workspaces/monorepo:
+
+bash
+Copy code
+# Example; adjust to your package manager
+pnpm install
+# or
 npm install
+3. Environment variables
+Create .env or service-specific env files as needed, based on the existing .env.example (if present).
 
-Compile
+Important:
+
+Never commit real private keys or secrets.
+
+Use placeholder/test keys only in examples.
+
+Typical variables might include:
+
+env
+Copy code
+RPC_URL_BASE_SEPOLIA=https://...
+WALLET_PRIVATE_KEY=0x...
+DATABASE_URL=postgres://...
+PLISIO_API_KEY=...
+4. Contracts: compile & test
+bash
+Copy code
+cd contracts
+npm install        # if needed
 npx hardhat compile
-
-Test Contracts
 npx hardhat test
+5. Deploy to Base Sepolia (example)
+bash
+Copy code
+npx hardhat run scripts/deploy.ts --network baseSepolia
+Update the “Current Testnet Deployment” section above with your deployed addresses.
 
-Test Processor
+6. Run the processor service (backend)
+bash
+Copy code
 cd ../processor
 npm install
-npm test
+npm run dev
+This should expose local API endpoints for creating escrows, checking status, and handling callbacks.
 
-## 9. Deploy (Any Chain)
-Configure .env
-RPC_URL=<rpc>
-DEPLOYER_PRIVATE_KEY=<private_key>
+7. Run the dashboard (frontend, if present)
+bash
+Copy code
+cd ../dashboard
+npm install
+npm run dev
+Then open the indicated URL (typically http://localhost:3000) in your browser.
 
-Deploy
-npx hardhat run scripts/deploy-bulwarkx.ts --network <chain>
+🧩 Merchant SDK & Integration (Conceptual)
+The exact API surface may differ; this is illustrative. Consult the processor and sdk code for the full, up-to-date interface.
 
-## 10. Roadmap
-# Phase 1 – Base
+Example TypeScript usage:
 
-Testnet + mainnet launch
+ts
+Copy code
+import { createEscrow } from "@bulwarkx/sdk";
 
-Merchant dashboard
+const escrow = await createEscrow({
+  buyerAddress: "0xBuyer...",
+  merchantAddress: "0xMerchant...",
+  tokenAddress: "0xStablecoin...",
+  amount: "1000000", // token units
+  orderId: "ORDER-123",
+  chain: "base-sepolia",
+});
+In an ecommerce plugin, this would typically run on the server side after an order is created, and the returned escrow ID / payment URL would be shown to the user.
 
-Shopify + WooCommerce plugins
+🧑‍⚖️ Bulwark Arbitrator Network (Design Overview)
+The Bulwark Arbitrator Network is an opt-in layer of human or organizational arbitrators who can:
 
-# Phase 2 – Multichain Expansion
+Resolve disputes if they arise between buyer and merchant
 
-Deploy to Ethereum, BNB, Polygon, Optimism
+Trigger refunds or releases based on evidence
 
-Stablecoin support (USDC, USDT)
+Earn a small fee per resolved case
 
-Fiat on/off-ramp integrations
+The design aims for:
 
-# Phase 3 – Global Arbitrator Network
+Transparent, on-chain actions
 
-Reputation system
+Reputation-based selection
 
-Delegated resolution markets
+Neutral incentives aligned with honest resolution
 
-Tokenized staking for arbitrators
+Optional usage by merchants or categories of merchants
 
-## 11. Vision
+Implementation details may be in separate contracts and docs.
 
-BulwarkX becomes the default escrow infrastructure for the onchain economy.
+🛡 Security & Responsible Disclosure
+Security is critical to BulwarkX.
 
-Across all chains.
-Across all use cases.
-Fully open-source.
-Fully decentralized.
+Do not use this code in production with real funds unless you understand the risks.
 
-## 12. License
+Always deploy behind audits, internal reviews, and testnets.
 
-MIT
+If you discover a vulnerability, please email:
+
+Security contact: security@yourdomain.com (replace with your actual email)
+
+Include, at minimum:
+
+A detailed description of the issue
+
+Steps to reproduce
+
+Potential impact
+
+Any suggested fixes
+
+Please avoid filing public GitHub issues for severe security problems until we have had a chance to investigate and patch.
+
+See SECURITY.md for more.
+
+📜 License
+This repository is licensed under the MIT License unless otherwise stated.
+See LICENSE for details.
+
+🤝 Contributing
+Contributions are welcome!
+
+Ways to help:
+
+File issues for bugs, missing docs, or feature requests
+
+Improve documentation and examples
+
+Add tests for critical flows
+
+Help integrate BulwarkX with more ecommerce platforms
+
+Please read CONTRIBUTING.md before opening a PR.
+
+🌍 Ecosystem & Grants
+BulwarkX is designed as public-good infrastructure for on-chain commerce:
+
+Safer crypto payments for buyers & merchants
+
+Reduced fraud for high-value items (like mining hardware)
+
+Open, forkable contracts and SDKs
+
+We aim to align with and contribute to:
+
+Base ecosystem (Superchain)
+
+Optimism & OP Stack
+
+Other EVM ecosystems interested in non-custodial escrow
+
+If you are a grant reviewer, partner, or collaborator, feel free to open an issue or reach out for:
+
+Demo calls
+
+Integration discussions
+
+Security review coordination
+
+⚠️ What is not open sourced
+For security and business reasons, certain things are intentionally not in this public repo:
+
+Production infrastructure configs (servers, DNS, firewalls)
+
+Secrets or API keys
+
+Internal monitoring and analytics tooling
+
+Private operational scripts for payouts or fee routing
+
+Business agreements and proprietary scoring logic (for arbitrators, risk systems, etc.)
+
+This repository focuses on the core protocol, contracts, SDK, and reference implementations.
+
+🧭 Roadmap (High-Level)
+ Additional EVM chain deployments
+
+ More stablecoin integrations
+
+ Expanded ecommerce plugins (Shopify, etc.)
+
+ Formal arbitrator reputation system
+
+ Full audits and bug bounty programs
+
+ Production-ready dashboards & merchant tooling
+
+Stay tuned and consider following the project on social media or GitHub stars to support the development.
