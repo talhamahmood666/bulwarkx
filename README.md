@@ -71,12 +71,11 @@ It lets buyers, sellers, and arbitrators coordinate trustlessly on-chain while f
 
 ## 🔗 Current Testnet Deployment
 
-> Replace placeholders below with your actual deployed addresses & links.
 
 - **Network:** Base Sepolia  
-- **Escrow Contract:** `0x...`  
-- **Block Explorer:** https://sepolia.basescan.org/address/0x...  
-- **Example Tx:** https://sepolia.basescan.org/tx/0x...
+- **Escrow Contract:** `0xCa97AEAA6055cbA49D8626Ec44eE447c54c43f37`  
+- **Block Explorer:** [https://sepolia.basescan.org/address/0x...](https://sepolia.basescan.org/address/0xca97aeaa6055cba49d8626ec44ee447c54c43f37)  
+- **Example Tx:** [https://sepolia.basescan.org/tx/0x...](https://sepolia.basescan.org/address/0xca97aeaa6055cba49d8626ec44ee447c54c43f37)
 
 This section should be updated as new testnets or mainnets are deployed.
 
@@ -97,16 +96,20 @@ This section should be updated as new testnets or mainnets are deployed.
 ```bash
 git clone https://github.com/your-org/bulwarkx.git
 cd bulwarkx
-2. Install dependencies
+```
+
+### 2. Install dependencies
 If you are using workspaces/monorepo:
 
+```bash
 bash
 Copy code
 # Example; adjust to your package manager
 pnpm install
 # or
 npm install
-3. Environment variables
+```
+### 3. Environment variables
 Create .env or service-specific env files as needed, based on the existing .env.example (if present).
 
 Important:
@@ -117,46 +120,56 @@ Use placeholder/test keys only in examples.
 
 Typical variables might include:
 
+```bash
 env
 Copy code
 RPC_URL_BASE_SEPOLIA=https://...
 WALLET_PRIVATE_KEY=0x...
 DATABASE_URL=postgres://...
-PLISIO_API_KEY=...
-4. Contracts: compile & test
+API_KEY=...
+```
+### 4. Contracts: compile & test
+```bash
 bash
 Copy code
 cd contracts
 npm install        # if needed
 npx hardhat compile
 npx hardhat test
-5. Deploy to Base Sepolia (example)
+```
+### 5. Deploy to Base Sepolia (example)
+```bash
 bash
 Copy code
 npx hardhat run scripts/deploy.ts --network baseSepolia
+```
 Update the “Current Testnet Deployment” section above with your deployed addresses.
 
-6. Run the processor service (backend)
+### 6. Run the processor service (backend)
+```bash
 bash
 Copy code
 cd ../processor
 npm install
 npm run dev
+```
 This should expose local API endpoints for creating escrows, checking status, and handling callbacks.
 
-7. Run the dashboard (frontend, if present)
+### 7. Run the dashboard (frontend, if present)
+```bash
 bash
 Copy code
 cd ../dashboard
 npm install
 npm run dev
+```
 Then open the indicated URL (typically http://localhost:3000) in your browser.
 
 ## 🧩 Merchant SDK & Integration (Conceptual)
 The exact API surface may differ; this is illustrative. Consult the processor and sdk code for the full, up-to-date interface.
 
 Example TypeScript usage:
-
+```bash
 ts
 Copy code
 import { createEscrow } from "@bulwarkx/sdk";
@@ -169,6 +182,7 @@ const escrow = await createEscrow({
   orderId: "ORDER-123",
   chain: "base-sepolia",
 });
+```
 In an ecommerce plugin, this would typically run on the server side after an order is created, and the returned escrow ID / payment URL would be shown to the user.
 
 ## 🧑‍⚖️ Bulwark Arbitrator Network (Design Overview)
@@ -201,21 +215,21 @@ Always deploy behind audits, internal reviews, and testnets.
 
 If you discover a vulnerability, please email:
 
-Security contact: security@yourdomain.com (replace with your actual email)
+### Security contact: bulwarkx@proton.me
 
 Include, at minimum:
 
-A detailed description of the issue
+#### A detailed description of the issue
 
-Steps to reproduce
+#### Steps to reproduce
 
-Potential impact
+#### Potential impact
 
-Any suggested fixes
+#### Any suggested fixes
 
-Please avoid filing public GitHub issues for severe security problems until we have had a chance to investigate and patch.
+### Please avoid filing public GitHub issues for severe security problems until we have had a chance to investigate and patch.
 
-See SECURITY.md for more.
+### See SECURITY.md for more.
 
 ## 📜 License
 This repository is licensed under the MIT License unless otherwise stated.
@@ -237,6 +251,7 @@ Help integrate BulwarkX with more ecommerce platforms
 Please read CONTRIBUTING.md before opening a PR.
 
 ## 🌍 Ecosystem & Grants
+
 BulwarkX is designed as public-good infrastructure for on-chain commerce:
 
 Safer crypto payments for buyers & merchants
@@ -262,6 +277,7 @@ Integration discussions
 Security review coordination
 
 ## ⚠️ What is not open sourced
+
 For security and business reasons, certain things are intentionally not in this public repo:
 
 Production infrastructure configs (servers, DNS, firewalls)
