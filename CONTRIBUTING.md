@@ -1,5 +1,6 @@
 
 Contributing to BulwarkX
+
 Thank you for your interest in contributing to BulwarkX!
 
 We welcome issues, documentation improvements, and pull requests that make the protocol, SDK, and integrations more secure, reliable, and useful.
