@@ -1,11 +1,11 @@
 
-Contributing to BulwarkX
+# Contributing to BulwarkX
 
 Thank you for your interest in contributing to BulwarkX!
 
 We welcome issues, documentation improvements, and pull requests that make the protocol, SDK, and integrations more secure, reliable, and useful.
 
-How to Contribute
+# How to Contribute
 Fork the repository and create a feature branch.
 
 Open an issue describing the bug or feature you’re addressing (if not already reported).
@@ -22,7 +22,8 @@ A clear summary of what changed and why
 
 Links to related issues
 
-Coding Guidelines
+# Coding Guidelines
+
 Follow the existing code style and conventions.
 
 Keep changes small and focused where possible.
@@ -31,7 +32,8 @@ Avoid committing secrets or private keys.
 
 For Solidity, prefer clarity and safety over cleverness.
 
-Security-Sensitive Changes
+# Security-Sensitive Changes
+
 If your contribution touches security-critical logic (escrow flows, authorization, etc.), please:
 
 Add extensive tests to cover edge cases.
