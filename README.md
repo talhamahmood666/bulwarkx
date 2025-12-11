@@ -152,7 +152,7 @@ npm install
 npm run dev
 Then open the indicated URL (typically http://localhost:3000) in your browser.
 
-🧩 Merchant SDK & Integration (Conceptual)
+## 🧩 Merchant SDK & Integration (Conceptual)
 The exact API surface may differ; this is illustrative. Consult the processor and sdk code for the full, up-to-date interface.
 
 Example TypeScript usage:
@@ -171,7 +171,7 @@ const escrow = await createEscrow({
 });
 In an ecommerce plugin, this would typically run on the server side after an order is created, and the returned escrow ID / payment URL would be shown to the user.
 
-🧑‍⚖️ Bulwark Arbitrator Network (Design Overview)
+## 🧑‍⚖️ Bulwark Arbitrator Network (Design Overview)
 The Bulwark Arbitrator Network is an opt-in layer of human or organizational arbitrators who can:
 
 Resolve disputes if they arise between buyer and merchant
@@ -192,7 +192,7 @@ Optional usage by merchants or categories of merchants
 
 Implementation details may be in separate contracts and docs.
 
-🛡 Security & Responsible Disclosure
+## 🛡 Security & Responsible Disclosure
 Security is critical to BulwarkX.
 
 Do not use this code in production with real funds unless you understand the risks.
@@ -217,11 +217,11 @@ Please avoid filing public GitHub issues for severe security problems until we h
 
 See SECURITY.md for more.
 
-📜 License
+## 📜 License
 This repository is licensed under the MIT License unless otherwise stated.
 See LICENSE for details.
 
-🤝 Contributing
+## 🤝 Contributing
 Contributions are welcome!
 
 Ways to help:
@@ -236,7 +236,7 @@ Help integrate BulwarkX with more ecommerce platforms
 
 Please read CONTRIBUTING.md before opening a PR.
 
-🌍 Ecosystem & Grants
+## 🌍 Ecosystem & Grants
 BulwarkX is designed as public-good infrastructure for on-chain commerce:
 
 Safer crypto payments for buyers & merchants
@@ -261,7 +261,7 @@ Integration discussions
 
 Security review coordination
 
-⚠️ What is not open sourced
+## ⚠️ What is not open sourced
 For security and business reasons, certain things are intentionally not in this public repo:
 
 Production infrastructure configs (servers, DNS, firewalls)
@@ -276,7 +276,8 @@ Business agreements and proprietary scoring logic (for arbitrators, risk systems
 
 This repository focuses on the core protocol, contracts, SDK, and reference implementations.
 
-🧭 Roadmap (High-Level)
+## 🧭 Roadmap (High-Level)
+
  Additional EVM chain deployments
 
  More stablecoin integrations
