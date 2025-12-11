@@ -102,8 +102,6 @@ cd bulwarkx
 If you are using workspaces/monorepo:
 
 ```bash
-bash
-Copy code
 # Example; adjust to your package manager
 pnpm install
 # or
@@ -121,8 +119,7 @@ Use placeholder/test keys only in examples.
 Typical variables might include:
 
 ```bash
-env
-Copy code
+
 RPC_URL_BASE_SEPOLIA=https://...
 WALLET_PRIVATE_KEY=0x...
 DATABASE_URL=postgres://...
@@ -130,8 +127,7 @@ API_KEY=...
 ```
 ### 4. Contracts: compile & test
 ```bash
-bash
-Copy code
+
 cd contracts
 npm install        # if needed
 npx hardhat compile
@@ -139,16 +135,14 @@ npx hardhat test
 ```
 ### 5. Deploy to Base Sepolia (example)
 ```bash
-bash
-Copy code
+
 npx hardhat run scripts/deploy.ts --network baseSepolia
 ```
 Update the “Current Testnet Deployment” section above with your deployed addresses.
 
 ### 6. Run the processor service (backend)
 ```bash
-bash
-Copy code
+
 cd ../processor
 npm install
 npm run dev
@@ -157,8 +151,7 @@ This should expose local API endpoints for creating escrows, checking status, an
 
 ### 7. Run the dashboard (frontend, if present)
 ```bash
-bash
-Copy code
+
 cd ../dashboard
 npm install
 npm run dev
@@ -170,8 +163,7 @@ The exact API surface may differ; this is illustrative. Consult the processor an
 
 Example TypeScript usage:
 ```bash
-ts
-Copy code
+
 import { createEscrow } from "@bulwarkx/sdk";
 
 const escrow = await createEscrow({
