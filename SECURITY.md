@@ -9,7 +9,7 @@ The project is in active development. Security fixes will generally be applied o
 If you believe you have found a security vulnerability in the codebase or deployed contracts:
 
 ## Email us at: bulwarkx@proton.me
-##Include:
+## Include:
 
 ### A detailed description of the issue
 
