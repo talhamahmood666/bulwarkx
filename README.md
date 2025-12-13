@@ -115,16 +115,17 @@ npx hardhat run scripts/demo-escrow.ts --network baseSepolia
 ```bash
 ESCROW_ID=0xYOUR_ESCROW_ID npx hardhat run scripts/demo-dispute.ts --network baseSepolia
 ```
-# Arbiter resolves
-```bash
-ESCROW_ID=0xYOUR_ESCROW_ID npx hardhat run scripts/demo-arbiter-release.ts --network baseSepolia
-# or
-ESCROW_ID=0xYOUR_ESCROW_ID npx hardhat run scripts/demo-arbiter-refund.ts --network baseSepolia
-```
-# Happy-path release by payer (no dispute)
+# Resolve dispute outcome
+## Seller-favor release (payer role)
 ```bash
 ESCROW_ID=0xYOUR_ESCROW_ID npx hardhat run scripts/demo-release.ts --network baseSepolia
 ```
+## Buyer-favor refund (payee role)
+```bash
+ESCROW_ID=0xYOUR_ESCROW_ID npx hardhat run scripts/demo-refund.ts --network baseSepolia
+```
+
+Current demo build supports dispute flagging + direct release/refund roles; arbiter-mediated resolution is on the roadmap.
 
 ⚠️ For real integrations, prefer:
 createEscrowWithId(...)
