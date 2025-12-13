@@ -118,6 +118,40 @@ Create .env or service-specific env files as needed, based on the existing .env.
 
 Important:
 
+## 🧰 TypeScript SDK (non-custodial)
+
+Need to generate escrow transactions without sharing private keys? Use the install-free SDK under `/sdk` (no registry fetches required):
+
+```bash
+cd sdk
+npm run build
+node --test
+```
+
+Example: build a native escrow payload and hand it to any signer (ethers/viem/wallet adapters):
+
+```js
+import { BulwarkXClient } from '@bulwarkx/sdk'
+
+const client = new BulwarkXClient({
+  chainId: Number(process.env.CHAIN_ID),
+  escrowAddress: process.env.ESCROW_ADDRESS
+})
+
+const { escrowId, tx } = client.buildNativeCreateTx({
+  orderId: process.env.ORDER_ID,
+  payer: process.env.PAYER,
+  payee: process.env.PAYEE,
+  arbiter: process.env.ARBITER,
+  amountWei: process.env.AMOUNT,
+  nonce: 0
+})
+
+await signer.sendTransaction(tx)
+```
+
+The SDK defaults to **non-custodial** mode (it only returns payloads). For a full quickstart and processor-backed flows, see [`/sdk/README.md`](sdk/README.md) and the runnable sample at [`/examples/sdk-demo`](examples/sdk-demo). If you prefer using ethers or viem, pull them in on the consumer side; the SDK itself has no external dependencies.
+
 Never commit real private keys or secrets.
 
 Use placeholder/test keys only in examples.
