@@ -33,45 +33,9 @@ async function main() {
   console.log("Nonce:", nonce.toString());
   console.log("Amount (wei):", amountWei.toString());
 
-  const sig4 = "createEscrowWithId(bytes32,address,address,uint256)";
-  const sig5 = "createEscrowWithId(bytes32,address,address,uint256,uint64)";
-
-  let selectedSig: string;
-  try {
-    escrow.interface.getFunction(sig4);
-    selectedSig = sig4;
-  } catch {
-    try {
-      escrow.interface.getFunction(sig5);
-      selectedSig = sig5;
-    } catch {
-      throw new Error("No matching createEscrowWithId overload found on contract");
-    }
-  }
-
-  const args = [orderId, payeeAddress, arbiterAddress, amountWei] as const;
-  let finalArgs: (typeof args[number] | bigint)[] = [...args];
-
-  if (selectedSig === sig5) {
-    const nowSeconds = Math.floor(Date.now() / 1000);
-    const expirySeconds = BigInt(nowSeconds + 7 * 24 * 60 * 60);
-    const maxUint64 = (1n << 64n) - 1n;
-    if (expirySeconds > maxUint64) {
-      throw new Error("Computed expiry exceeds uint64 range");
-    }
-    finalArgs = [...args, expirySeconds];
-    console.log("Using 5-arg createEscrowWithId with expiry:", expirySeconds.toString());
-  } else {
-    console.log("Using 4-arg createEscrowWithId");
-  }
-
-  const data = escrow.interface.encodeFunctionData(selectedSig, finalArgs);
-
-  const tx1 = await payer.sendTransaction({
-    to: ESCROW_ADDRESS,
-    data,
-    value: amountWei,
-  });
+  const tx1 = await escrow[
+    "createEscrowWithId(bytes32,address,address,uint256)"
+  ](orderId, payeeAddress, arbiterAddress, amountWei, { value: amountWei });
 
   console.log("Transaction hash:", tx1.hash);
   await tx1.wait();
