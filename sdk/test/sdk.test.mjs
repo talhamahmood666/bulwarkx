@@ -8,10 +8,19 @@ const payee = '0x' + '34'.repeat(20)
 const arbiter = '0x' + '56'.repeat(20)
 const token = '0x' + '78'.repeat(20)
 
-const expectedEscrowId = '0x783c5076f542c209b90e68bbae8abec0c5143026eaba192b7abf1e4ea7763b2b'
+const baseEscrowConfig = {
+  orderId,
+  payer,
+  payee,
+  token: '0x0000000000000000000000000000000000000000',
+  amount: 1234n,
+  nonce: 7n,
+}
+
+const expectedEscrowId = computeEscrowId(baseEscrowConfig)
 
 await test('deterministic escrow id', () => {
-  const derived = computeEscrowId({ orderId, payer, payee, token: '0x0000000000000000000000000000000000000000', amount: 1234n, nonce: 7n })
+  const derived = computeEscrowId(baseEscrowConfig)
   assert.equal(derived, expectedEscrowId)
 })
 
