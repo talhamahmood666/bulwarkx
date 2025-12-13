@@ -87,6 +87,141 @@ This section should be updated as new testnets or mainnets are deployed.
 
 ---
 
+⚡ 2-Minute Base Sepolia Demo (Non-Custodial Escrow Lifecycle)
+
+This demo shows the full lifecycle of a BulwarkX escrow on Base Sepolia, using non-custodial transactions.
+The processor / scripts do not custody funds — the user wallet signs and submits transactions.
+
+Prerequisites
+
+Node.js 18+
+
+Funded Base Sepolia wallet
+
+RPC access (default public RPC works)
+
+1️⃣ Deploy the Escrow Contract
+```bash
+cd contracts
+npx hardhat run scripts/deploy-bulwarkx.ts --network baseSepolia
+```
+
+Output:
+
+Escrow contract address
+
+Deployer (payer) address
+
+2️⃣ Create a Native ETH Escrow (Wallet-Signed)
+
+This creates an escrow with a deterministic escrowId derived from:
+orderId + payer nonce.
+```bash
+
+npx hardhat run scripts/demo-escrow.ts --network baseSepolia
+```
+
+What happens:
+
+Script prints a wallet-ready transaction payload
+
+Script optionally broadcasts the transaction
+
+Escrow is created on-chain
+
+Output includes:
+
+orderId
+
+nonce
+
+escrowId
+
+Basescan transaction link
+
+3️⃣ (Optional) Raise a Dispute
+
+Either party can flag a dispute before settlement.
+
+```bash
+ESCROW_ID=0xYOUR_ESCROW_ID \
+npx hardhat run scripts/demo-dispute.ts --network baseSepolia
+```
+
+Result:
+
+Escrow status updates to Disputed
+
+Arbiter is now authorized to resolve
+
+4️⃣ Arbiter Resolution (Two Paths)
+A) Arbiter releases funds to payee
+```bash
+ESCROW_ID=0xYOUR_ESCROW_ID \
+npx hardhat run scripts/demo-arbiter-release.ts --network baseSepolia
+```
+B) Arbiter refunds payer
+```bash
+ESCROW_ID=0xYOUR_ESCROW_ID \
+npx hardhat run scripts/demo-arbiter-refund.ts --network baseSepolia
+```
+5️⃣ Happy-Path Release (No Dispute)
+
+If no dispute occurs, payer can directly release:
+```bash
+ESCROW_ID=0xYOUR_ESCROW_ID \
+npx hardhat run scripts/demo-release.ts --network baseSepolia
+```
+6️⃣ On-Chain Verification
+
+Each script reads the escrow mapping after execution and prints:
+
+payer
+
+payee
+
+arbiter
+
+token (address(0) for native ETH)
+
+amount
+
+timestamps
+
+status enum
+
+This proves:
+
+Funds were never custodied
+
+State transitions are enforced on-chain
+
+Arbiter powers are constrained by the contract
+
+🛡️ Security Notes
+
+Escrow contract uses ReentrancyGuard
+
+Deterministic escrow IDs prevent overwrites
+
+Native and ERC-20 flows share the same safety model
+
+Processor defaults to non-custodial mode
+
+🌍 Why Base / OP Stack
+
+BulwarkX is designed for:
+
+Low-cost dispute resolution
+
+High-volume commerce
+
+L2-native UX with L1-grade security
+
+Base Sepolia is used here for demonstration; the same flow applies to Base Mainnet and OP Stack chains.
+
+---
+
 ## 🚀 Getting Started (Local Dev)
 
 ### Prerequisites
