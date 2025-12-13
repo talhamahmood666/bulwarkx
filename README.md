@@ -39,9 +39,10 @@ BulwarkX now supports native ETH and ERC-20 tokens (USDT/USDC-style) across Base
 
 - `processor/`  
   Backend service (TypeScript/Node/Express) that:
-  - Talks to the escrow contracts on-chain  
-  - Exposes REST/webhook endpoints for ecommerce platforms  
+  - Talks to the escrow contracts on-chain
+  - Exposes REST/webhook endpoints for ecommerce platforms
   - Persists invoice and escrow references in a database
+  - Defaults to **non-custodial mode**, returning transaction payloads for buyer wallets to sign
 
 - `dashboard/`  
   Frontend (e.g., Next.js/React) for:  
@@ -126,7 +127,8 @@ Typical variables might include:
 ```bash
 
 RPC_URL_BASE_SEPOLIA=https://...
-WALLET_PRIVATE_KEY=0x...
+WALLET_PRIVATE_KEY=0x... # required only when NON_CUSTODIAL_MODE=false
+NON_CUSTODIAL_MODE=true   # default; set to false to let the processor sign
 DATABASE_URL=postgres://...
 API_KEY=...
 ```
@@ -152,7 +154,10 @@ cd ../processor
 npm install
 npm run dev
 ```
-This should expose local API endpoints for creating escrows, checking status, and handling callbacks.
+This exposes local API endpoints for creating escrows, checking status, and handling callbacks. In the default
+**non-custodial mode** the `/escrow/create` route returns transaction payloads (`to`, `data`, `value`, `chainId`) for
+wallets to sign and broadcast. ERC-20 flows return an approval + create payload pair. Set `NON_CUSTODIAL_MODE=false`
+to re-enable legacy server-signer behavior (requires `PRIVATE_KEY`).
 
 ### 7. Run the dashboard (frontend, if present)
 ```bash

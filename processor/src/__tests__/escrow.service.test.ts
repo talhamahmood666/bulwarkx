@@ -14,8 +14,8 @@ describe('escrow.service', () => {
     jest.resetModules();
 
     mockContractInstance = {
-      createEscrow: jest.fn(),
-      createEscrowToken: jest.fn(),
+      createEscrowWithId: jest.fn(),
+      createEscrowTokenWithId: jest.fn(),
       releaseEscrow: jest.fn(),
       refundEscrow: jest.fn(),
       interface: { parseLog: jest.fn() },
@@ -69,7 +69,7 @@ describe('escrow.service', () => {
         logs: [{ data: '0x01' }],
       }),
     };
-    ethers.__mockContractInstance.createEscrow.mockResolvedValue(tx);
+    ethers.__mockContractInstance.createEscrowWithId.mockResolvedValue(tx);
     ethers.__mockContractInstance.interface.parseLog.mockReturnValue({
       name: 'EscrowCreated',
       args: { escrowId: '0xescrow' },
@@ -82,18 +82,20 @@ describe('escrow.service', () => {
       hash: '0xtokentx',
       wait: jest.fn().mockResolvedValue({ hash: '0xtokentx', logs: [] }),
     };
-    ethers.__mockContractInstance.createEscrowToken.mockResolvedValue(tx);
+    ethers.__mockContractInstance.createEscrowTokenWithId.mockResolvedValue(tx);
     return tx;
   }
 
   it('createEscrow calls EVM contract with correct params for native payments', async () => {
     const tx = setupNativeEscrowMocks();
+    const orderId = '0x' + '11'.repeat(32);
 
     const result = await createEscrow({
       chain: 'base',
       payee: '0xpayee',
       arbiter: '0xarbiter',
       amount: '1.5',
+      orderId,
     });
 
     expect(configSpy).toHaveBeenCalledWith('base');
@@ -102,9 +104,11 @@ describe('escrow.service', () => {
       BulwarkXEscrow.abi,
       expect.any(Object)
     );
-    expect(ethers.__mockContractInstance.createEscrow).toHaveBeenCalledWith(
+    expect(ethers.__mockContractInstance.createEscrowWithId).toHaveBeenCalledWith(
+      orderId,
       '0xpayee',
       '0xarbiter',
+      expect.any(BigInt),
       3600,
       expect.objectContaining({ value: expect.any(BigInt) })
     );
@@ -114,6 +118,7 @@ describe('escrow.service', () => {
 
   it('createEscrow calls token-based flow when tokenAddress is provided', async () => {
     const tx = setupTokenEscrowMocks();
+    const orderId = '0x' + '22'.repeat(32);
 
     const result = await createEscrow({
       chain: 'base',
@@ -122,12 +127,14 @@ describe('escrow.service', () => {
       amount: 5n,
       tokenAddress: '0xtoken',
       autoReleaseSeconds: 900,
+      orderId,
     });
 
-    expect(ethers.__mockContractInstance.createEscrowToken).toHaveBeenCalledWith(
+    expect(ethers.__mockContractInstance.createEscrowTokenWithId).toHaveBeenCalledWith(
+      orderId,
+      '0xtoken',
       '0xpayee',
       '0xarbiter',
-      '0xtoken',
       5n,
       900
     );
@@ -158,7 +165,7 @@ describe('escrow.service', () => {
   });
 
   it('propagates RPC/contract errors for createEscrow', async () => {
-    ethers.__mockContractInstance.createEscrow.mockRejectedValue(new Error('network down'));
+    ethers.__mockContractInstance.createEscrowWithId.mockRejectedValue(new Error('network down'));
 
     await expect(
       createEscrow({ chain: 'base', payee: '0xpayee', arbiter: '0xarbiter', amount: '1' })

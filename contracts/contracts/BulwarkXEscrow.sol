@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
  * @title BulwarkXEscrow
@@ -16,7 +17,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
  *
  * NOTE: This is a skeleton. Fill in the core logic in a later step.
  */
-contract BulwarkXEscrow {
+contract BulwarkXEscrow is ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     enum EscrowStatus {
@@ -39,56 +40,75 @@ contract BulwarkXEscrow {
     }
 
     mapping(bytes32 => Escrow) public escrows;
+    mapping(address => uint256) public nonces;
+
+    uint64 public constant DEFAULT_AUTO_RELEASE_SECONDS = 3600;
 
     event EscrowCreated(
         bytes32 indexed escrowId,
         address indexed payer,
         address indexed payee,
+        address arbiter,
         address token,
         uint256 amount,
+        EscrowStatus status,
+        uint64 createdAt,
         uint64 autoReleaseAt
     );
 
     event EscrowFunded(bytes32 indexed escrowId);
-    event EscrowReleased(bytes32 indexed escrowId, address indexed payee);
-    event EscrowRefunded(bytes32 indexed escrowId, address indexed payer);
-    event EscrowDisputed(bytes32 indexed escrowId, address indexed caller);
+
+    event EscrowReleased(
+        bytes32 indexed escrowId,
+        address indexed payer,
+        address indexed payee,
+        address arbiter,
+        address token,
+        uint256 amount,
+        EscrowStatus status,
+        uint64 timestamp
+    );
+
+    event EscrowRefunded(
+        bytes32 indexed escrowId,
+        address indexed payer,
+        address indexed payee,
+        address arbiter,
+        address token,
+        uint256 amount,
+        EscrowStatus status,
+        uint64 timestamp
+    );
+
+    event EscrowDisputed(
+        bytes32 indexed escrowId,
+        address indexed caller,
+        address indexed payer,
+        address payee,
+        address arbiter,
+        address token,
+        uint256 amount,
+        EscrowStatus status,
+        uint64 timestamp
+    );
 
     function createEscrow(
         address _payee,
         address _arbiter,
-        uint256 _autoReleaseSeconds
+        uint64 _autoReleaseSeconds
     ) external payable returns (bytes32) {
-        require(_payee != address(0), "invalid payee");
-        require(_arbiter != address(0), "invalid arbiter");
-        require(_autoReleaseSeconds > 0, "auto release must be set");
-        require(msg.value > 0, "amount must be > 0");
-
-        bytes32 escrowId = keccak256(
-            abi.encodePacked(msg.sender, _payee, msg.value, block.timestamp)
+        bytes32 orderId = keccak256(
+            abi.encodePacked(msg.sender, _payee, _arbiter, _autoReleaseSeconds, block.timestamp)
         );
 
-        Escrow storage escrow = escrows[escrowId];
-        escrow.payer = msg.sender;
-        escrow.payee = _payee;
-        escrow.arbiter = _arbiter;
-        escrow.token = address(0);
-        escrow.amount = msg.value;
-        escrow.createdAt = uint64(block.timestamp);
-        escrow.autoReleaseAt = uint64(block.timestamp + _autoReleaseSeconds);
-        escrow.status = EscrowStatus.Funded;
-
-        emit EscrowCreated(
-            escrowId,
-            msg.sender,
-            _payee,
-            address(0),
-            msg.value,
-            escrow.autoReleaseAt
-        );
-        emit EscrowFunded(escrowId);
-
-        return escrowId;
+        return
+            createEscrowWithId(
+                orderId,
+                _payee,
+                _arbiter,
+                msg.value,
+                _autoReleaseSeconds
+            );
     }
 
     function createEscrowToken(
@@ -98,18 +118,129 @@ contract BulwarkXEscrow {
         uint256 _amount,
         uint64 _autoReleaseSeconds
     ) external returns (bytes32) {
+        bytes32 orderId = keccak256(
+            abi.encodePacked(msg.sender, _payee, _token, _amount, _autoReleaseSeconds, block.timestamp)
+        );
+
+        return
+            createEscrowTokenWithId(
+                orderId,
+                _token,
+                _payee,
+                _arbiter,
+                _amount,
+                _autoReleaseSeconds
+            );
+    }
+
+    function createEscrowWithId(
+        bytes32 orderId,
+        address _payee,
+        address _arbiter,
+        uint256 _amount
+    ) external payable returns (bytes32) {
+        return createEscrowWithId(orderId, _payee, _arbiter, _amount, DEFAULT_AUTO_RELEASE_SECONDS);
+    }
+
+    function createEscrowWithId(
+        bytes32 orderId,
+        address _payee,
+        address _arbiter,
+        uint256 _amount,
+        uint64 _autoReleaseSeconds
+    ) public payable returns (bytes32) {
+        require(_payee != address(0), "invalid payee");
+        require(_arbiter != address(0), "invalid arbiter");
+        require(_amount > 0, "amount must be > 0");
+        require(_autoReleaseSeconds > 0, "auto release must be set");
+        require(msg.value == _amount, "incorrect msg.value");
+
+        uint256 nonce = nonces[msg.sender];
+        bytes32 escrowId = _deriveEscrowId(
+            orderId,
+            msg.sender,
+            _payee,
+            address(0),
+            _amount,
+            nonce
+        );
+
+        Escrow storage escrow = escrows[escrowId];
+        require(escrow.status == EscrowStatus.Uninitialized, "escrow exists");
+
+        nonces[msg.sender] = nonce + 1;
+
+        escrow.payer = msg.sender;
+        escrow.payee = _payee;
+        escrow.arbiter = _arbiter;
+        escrow.token = address(0);
+        escrow.amount = _amount;
+        escrow.createdAt = uint64(block.timestamp);
+        escrow.autoReleaseAt = uint64(block.timestamp + _autoReleaseSeconds);
+        escrow.status = EscrowStatus.Funded;
+
+        emit EscrowCreated(
+            escrowId,
+            msg.sender,
+            _payee,
+            _arbiter,
+            address(0),
+            _amount,
+            escrow.status,
+            escrow.createdAt,
+            escrow.autoReleaseAt
+        );
+        emit EscrowFunded(escrowId);
+
+        return escrowId;
+    }
+
+    function createEscrowTokenWithId(
+        bytes32 orderId,
+        address _token,
+        address _payee,
+        address _arbiter,
+        uint256 _amount
+    ) external returns (bytes32) {
+        return
+            createEscrowTokenWithId(
+                orderId,
+                _token,
+                _payee,
+                _arbiter,
+                _amount,
+                DEFAULT_AUTO_RELEASE_SECONDS
+            );
+    }
+
+    function createEscrowTokenWithId(
+        bytes32 orderId,
+        address _token,
+        address _payee,
+        address _arbiter,
+        uint256 _amount,
+        uint64 _autoReleaseSeconds
+    ) public returns (bytes32) {
         require(_payee != address(0), "invalid payee");
         require(_arbiter != address(0), "invalid arbiter");
         require(_token != address(0), "invalid token");
         require(_amount > 0, "amount must be > 0");
         require(_autoReleaseSeconds > 0, "auto release must be set");
 
-        bytes32 escrowId = keccak256(
-            abi.encodePacked(msg.sender, _payee, _token, _amount, block.timestamp)
+        uint256 nonce = nonces[msg.sender];
+        bytes32 escrowId = _deriveEscrowId(
+            orderId,
+            msg.sender,
+            _payee,
+            _token,
+            _amount,
+            nonce
         );
 
         Escrow storage escrow = escrows[escrowId];
         require(escrow.status == EscrowStatus.Uninitialized, "escrow exists");
+
+        nonces[msg.sender] = nonce + 1;
 
         escrow.payer = msg.sender;
         escrow.payee = _payee;
@@ -126,8 +257,11 @@ contract BulwarkXEscrow {
             escrowId,
             msg.sender,
             _payee,
+            _arbiter,
             _token,
             _amount,
+            escrow.status,
+            escrow.createdAt,
             escrow.autoReleaseAt
         );
         emit EscrowFunded(escrowId);
@@ -135,7 +269,7 @@ contract BulwarkXEscrow {
         return escrowId;
     }
 
-    function releaseEscrow(bytes32 escrowId) external {
+    function releaseEscrow(bytes32 escrowId) external nonReentrant {
         Escrow storage escrow = escrows[escrowId];
         require(
             escrow.status != EscrowStatus.Uninitialized,
@@ -161,10 +295,19 @@ contract BulwarkXEscrow {
 
         _payout(escrow.payee, escrow.token, escrow.amount);
 
-        emit EscrowReleased(escrowId, escrow.payee);
+        emit EscrowReleased(
+            escrowId,
+            escrow.payer,
+            escrow.payee,
+            escrow.arbiter,
+            escrow.token,
+            escrow.amount,
+            escrow.status,
+            uint64(block.timestamp)
+        );
     }
 
-    function refundEscrow(bytes32 escrowId) external {
+    function refundEscrow(bytes32 escrowId) external nonReentrant {
         Escrow storage escrow = escrows[escrowId];
         require(
             escrow.status != EscrowStatus.Uninitialized,
@@ -185,7 +328,16 @@ contract BulwarkXEscrow {
 
         _payout(escrow.payer, escrow.token, escrow.amount);
 
-        emit EscrowRefunded(escrowId, escrow.payer);
+        emit EscrowRefunded(
+            escrowId,
+            escrow.payer,
+            escrow.payee,
+            escrow.arbiter,
+            escrow.token,
+            escrow.amount,
+            escrow.status,
+            uint64(block.timestamp)
+        );
     }
 
     function openDispute(bytes32 escrowId) external {
@@ -202,7 +354,17 @@ contract BulwarkXEscrow {
 
         escrow.status = EscrowStatus.Disputed;
 
-        emit EscrowDisputed(escrowId, msg.sender);
+        emit EscrowDisputed(
+            escrowId,
+            msg.sender,
+            escrow.payer,
+            escrow.payee,
+            escrow.arbiter,
+            escrow.token,
+            escrow.amount,
+            escrow.status,
+            uint64(block.timestamp)
+        );
     }
 
     function _payout(
@@ -216,5 +378,19 @@ contract BulwarkXEscrow {
         } else {
             IERC20(token).safeTransfer(recipient, amount);
         }
+    }
+
+    function _deriveEscrowId(
+        bytes32 orderId,
+        address payer,
+        address payee,
+        address token,
+        uint256 amount,
+        uint256 nonce
+    ) internal pure returns (bytes32) {
+        return
+            keccak256(
+                abi.encodePacked(orderId, payer, payee, token, amount, nonce)
+            );
     }
 }

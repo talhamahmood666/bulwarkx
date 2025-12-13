@@ -1,6 +1,5 @@
 import express from 'express';
 import { getEscrowContract } from '../blockchain';
-import { escrowStore } from '../db';
 
 const router = express.Router();
 
@@ -13,7 +12,6 @@ router.get('/:id', async (req, res) => {
 
     const escrowContract = getEscrowContract();
     const onchain = await escrowContract.escrows(escrowId);
-    const local = escrowStore.get(String(escrowId));
 
     const onchainResponse = {
       payer: onchain[0],
@@ -26,15 +24,10 @@ router.get('/:id', async (req, res) => {
       status: Number(onchain[7] || 0),
     };
 
-    return res.json({
-      success: true,
-      escrowId,
-      onchain: onchainResponse,
-      local: local || null
-    });
+    return res.json({ success: true, escrowId, onchain: onchainResponse });
   } catch (error: any) {
     // eslint-disable-next-line no-console
-    console.error('status error', error);
+    console.error('verify escrow error', error);
     return res.status(500).json({ success: false, error: error?.message || 'Internal error' });
   }
 });

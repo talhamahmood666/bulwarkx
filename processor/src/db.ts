@@ -1,4 +1,4 @@
-export type EscrowStatus = 'onchain_open' | 'released' | 'refunded';
+export type EscrowStatus = 'onchain_open' | 'released' | 'refunded' | 'pending_signature';
 
 export interface EscrowRecord {
   id: string;
