@@ -92,7 +92,7 @@ This section should be updated as new testnets or mainnets are deployed.
 This demo shows the full lifecycle of a BulwarkX escrow on Base Sepolia, using non-custodial transactions.
 The processor / scripts do not custody funds — the user wallet signs and submits transactions.
 
-Prerequisites
+### Prerequisites
 
 Node.js 18+
 
@@ -100,7 +100,7 @@ Funded Base Sepolia wallet
 
 RPC access (default public RPC works)
 
-1️⃣ Deploy the Escrow Contract
+### 1️⃣ Deploy the Escrow Contract
 ```bash
 cd contracts
 npx hardhat run scripts/deploy-bulwarkx.ts --network baseSepolia
@@ -112,7 +112,7 @@ Escrow contract address
 
 Deployer (payer) address
 
-2️⃣ Create a Native ETH Escrow (Wallet-Signed)
+### 2️⃣ Create a Native ETH Escrow (Wallet-Signed)
 
 This creates an escrow with a deterministic escrowId derived from:
 orderId + payer nonce.
@@ -139,7 +139,7 @@ escrowId
 
 Basescan transaction link
 
-3️⃣ (Optional) Raise a Dispute
+### 3️⃣ (Optional) Raise a Dispute
 
 Either party can flag a dispute before settlement.
 
@@ -154,7 +154,7 @@ Escrow status updates to Disputed
 
 Arbiter is now authorized to resolve
 
-4️⃣ Arbiter Resolution (Two Paths)
+### 4️⃣ Arbiter Resolution (Two Paths)
 A) Arbiter releases funds to payee
 ```bash
 ESCROW_ID=0xYOUR_ESCROW_ID \
@@ -165,14 +165,14 @@ B) Arbiter refunds payer
 ESCROW_ID=0xYOUR_ESCROW_ID \
 npx hardhat run scripts/demo-arbiter-refund.ts --network baseSepolia
 ```
-5️⃣ Happy-Path Release (No Dispute)
+### 5️⃣ Happy-Path Release (No Dispute)
 
 If no dispute occurs, payer can directly release:
 ```bash
 ESCROW_ID=0xYOUR_ESCROW_ID \
 npx hardhat run scripts/demo-release.ts --network baseSepolia
 ```
-6️⃣ On-Chain Verification
+### 6️⃣ On-Chain Verification
 
 Each script reads the escrow mapping after execution and prints:
 
@@ -198,7 +198,7 @@ State transitions are enforced on-chain
 
 Arbiter powers are constrained by the contract
 
-🛡️ Security Notes
+## 🛡️ Security Notes
 
 Escrow contract uses ReentrancyGuard
 
@@ -208,7 +208,7 @@ Native and ERC-20 flows share the same safety model
 
 Processor defaults to non-custodial mode
 
-🌍 Why Base / OP Stack
+## 🌍 Why Base / OP Stack
 
 BulwarkX is designed for:
 
