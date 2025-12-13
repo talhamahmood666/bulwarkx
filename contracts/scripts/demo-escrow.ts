@@ -33,21 +33,28 @@ async function main() {
   console.log("Nonce:", nonce.toString());
   console.log("Amount (wei):", amountWei.toString());
 
-  const preferredSignature = "createEscrowWithId(bytes32,address,address,uint256)";
-  const fallbackSignature = "createEscrowWithId(bytes32,address,address,uint256,uint64)";
+  const has4 = escrow.interface.fragments.some(
+    (f: any) => f.type === "function" && f.format() === "createEscrowWithId(bytes32,address,address,uint256)"
+  );
+  const has5 = escrow.interface.fragments.some(
+    (f: any) =>
+      f.type === "function" && f.format() === "createEscrowWithId(bytes32,address,address,uint256,uint64)"
+  );
 
   let tx;
-  try {
-    escrow.interface.getFunction(preferredSignature);
-    tx = await escrow[preferredSignature](orderId, payeeAddress, arbiterAddress, amountWei, {
-      value: amountWei,
-    });
+  if (has4) {
+    tx = await escrow["createEscrowWithId(bytes32,address,address,uint256)"](
+      orderId,
+      payeeAddress,
+      arbiterAddress,
+      amountWei,
+      { value: amountWei }
+    );
     console.log("Called 4-arg createEscrowWithId");
-  } catch (error) {
-    escrow.interface.getFunction(fallbackSignature);
+  } else if (has5) {
     const nowSeconds = Math.floor(Date.now() / 1000);
     const expirySeconds = BigInt(nowSeconds + 7 * 24 * 60 * 60);
-    tx = await escrow[fallbackSignature](
+    tx = await escrow["createEscrowWithId(bytes32,address,address,uint256,uint64)"](
       orderId,
       payeeAddress,
       arbiterAddress,
@@ -56,6 +63,8 @@ async function main() {
       { value: amountWei }
     );
     console.log("Called 5-arg createEscrowWithId with expiry:", expirySeconds.toString());
+  } else {
+    throw new Error("No matching createEscrowWithId overload found on contract");
   }
 
   const receipt = await tx.wait();
