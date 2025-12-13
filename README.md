@@ -87,7 +87,7 @@ This section should be updated as new testnets or mainnets are deployed.
 
 ---
 
-⚡ 2-Minute Base Sepolia Demo (Non-Custodial Escrow Lifecycle)
+##⚡ 2-Minute Base Sepolia Demo (Non-Custodial Escrow Lifecycle)
 
 This demo shows the full lifecycle of a BulwarkX escrow on Base Sepolia, using non-custodial transactions.
 The processor / scripts do not custody funds — the user wallet signs and submits transactions.
