@@ -71,6 +71,9 @@ describe("BulwarkXEscrow (Base-focused)", function () {
 
     expect(escrowId).to.match(/^0x[0-9a-fA-F]{64}$/);
 
+    expect(created?.args?.token).to.equal(ethers.ZeroAddress);
+    expect(created?.args?.amount).to.equal(amount);
+
     const stored = await escrow.escrows(escrowId);
     expect(stored.payer).to.equal(payer.address);
     expect(stored.payee).to.equal(payee.address);
@@ -100,6 +103,9 @@ describe("BulwarkXEscrow (Base-focused)", function () {
 
     expect(escrowId).to.match(/^0x[0-9a-fA-F]{64}$/);
     expect(await token.balanceOf(await escrow.getAddress())).to.equal(amount);
+
+    expect(created?.args?.token).to.equal(await token.getAddress());
+    expect(created?.args?.amount).to.equal(amount);
 
     const stored = await escrow.escrows(escrowId);
     expect(stored.token).to.equal(await token.getAddress());
@@ -269,5 +275,89 @@ describe("BulwarkXEscrow (Base-focused)", function () {
     await expect(escrow.connect(payer).refundEscrow(escrowId)).to.be.revertedWith(
       "cannot refund"
     );
+  });
+
+  it("blocks reentrancy on payout", async function () {
+    const { escrow, payer, arbiter } = await deployEscrowFixture();
+    const Reenter = await ethers.getContractFactory("Reenter");
+    const attacker = await Reenter.deploy(await escrow.getAddress());
+    await attacker.waitForDeployment();
+
+    const amount = ethers.parseEther("0.75");
+    const orderId = ethers.id("REENTER-1");
+
+    const tx = await escrow
+      .connect(payer)
+      .createEscrowWithId(orderId, await attacker.getAddress(), arbiter.address, amount, 3600, {
+        value: amount,
+      });
+    const receipt = await tx.wait();
+    const escrowId = findEscrowCreated(receipt!, escrow.interface)?.args?.escrowId as string;
+
+    await attacker.setEscrowId(escrowId);
+
+    await expect(() => escrow.connect(payer).releaseEscrow(escrowId)).to.changeEtherBalances(
+      [escrow, attacker],
+      [-amount, amount]
+    );
+
+    const stored = await escrow.escrows(escrowId);
+    expect(Number(stored.status)).to.equal(EscrowStatus.Released);
+    expect(await attacker.attemptedReenter()).to.equal(true);
+  });
+
+  it("prevents overwriting native escrows", async function () {
+    const { escrow, payer, payee, arbiter } = await deployEscrowFixture();
+    const amount = ethers.parseEther("0.1");
+    const orderId = ethers.id("overwrite-test");
+
+    const tx = await escrow
+      .connect(payer)
+      .createEscrowWithId(orderId, payee.address, arbiter.address, amount, 3600, { value: amount });
+    const receipt = await tx.wait();
+    const escrowId = findEscrowCreated(receipt!, escrow.interface)?.args?.escrowId as string;
+
+    expect(escrowId).to.match(/^0x[0-9a-fA-F]{64}$/);
+
+    const mappingSlot = 2; // nonces mapping slot (ReentrancyGuard uses slot 0)
+    const slot = ethers.keccak256(
+      ethers.AbiCoder.defaultAbiCoder().encode(["address", "uint256"], [payer.address, mappingSlot])
+    );
+
+    await ethers.provider.send("hardhat_setStorageAt", [
+      await escrow.getAddress(),
+      slot,
+      ethers.zeroPadValue("0x00", 32),
+    ]);
+
+    await expect(
+      escrow
+        .connect(payer)
+        .createEscrowWithId(orderId, payee.address, arbiter.address, amount, 3600, { value: amount })
+    ).to.be.revertedWith("escrow exists");
+  });
+
+  it("derives deterministic escrowIds with orderIds and nonces", async function () {
+    const { escrow, payer, payee, arbiter } = await deployEscrowFixture();
+    const amount = ethers.parseEther("0.33");
+    const orderId = ethers.id("order-123");
+
+    const startingNonce = await escrow.nonces(payer.address);
+    const expectedEscrowId = ethers.keccak256(
+      ethers.solidityPacked(
+        ["bytes32", "address", "address", "address", "uint256", "uint256"],
+        [orderId, payer.address, payee.address, ethers.ZeroAddress, amount, startingNonce]
+      )
+    );
+
+    const tx = await escrow
+      .connect(payer)
+      .createEscrowWithId(orderId, payee.address, arbiter.address, amount, 7200, { value: amount });
+    const receipt = await tx.wait();
+    const created = findEscrowCreated(receipt!, escrow.interface);
+    const escrowId = created?.args?.escrowId as string;
+
+    expect(escrowId).to.equal(expectedEscrowId);
+    expect(await escrow.nonces(payer.address)).to.equal(startingNonce + 1n);
   });
 });

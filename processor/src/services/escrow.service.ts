@@ -9,6 +9,7 @@ type CreateEscrowParams = {
   amount: bigint | string;
   autoReleaseSeconds?: number;
   tokenAddress?: string;
+  orderId?: string;
 };
 
 type TxResult = { escrowId?: string; txHash?: string };
@@ -33,18 +34,25 @@ export async function createEscrow(params: CreateEscrowParams): Promise<TxResult
     const escrowContract = getEscrowContractForChain(params.chain, BulwarkXEscrow.abi);
     const autoReleaseSeconds = params.autoReleaseSeconds ?? 3600;
     const isNative = !params.tokenAddress;
+    const derivedOrderId =
+      params.orderId && ethers.isHexString(params.orderId, 32)
+        ? params.orderId
+        : ethers.id(params.orderId || `order-${Date.now()}`);
 
     const tx = isNative
-      ? await escrowContract.createEscrow(
+      ? await escrowContract.createEscrowWithId(
+          derivedOrderId,
           params.payee,
           params.arbiter,
+          typeof params.amount === 'bigint' ? params.amount : ethers.parseEther(String(params.amount)),
           autoReleaseSeconds,
           { value: typeof params.amount === 'bigint' ? params.amount : ethers.parseEther(String(params.amount)) }
         )
-      : await escrowContract.createEscrowToken(
+      : await escrowContract.createEscrowTokenWithId(
+          derivedOrderId,
+          params.tokenAddress,
           params.payee,
           params.arbiter,
-          params.tokenAddress,
           BigInt(params.amount),
           autoReleaseSeconds
         );

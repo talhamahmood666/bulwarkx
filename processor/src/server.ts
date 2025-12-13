@@ -5,6 +5,7 @@ import createRouter from './routes/create';
 import releaseRouter from './routes/release';
 import refundRouter from './routes/refund';
 import statusRouter from './routes/status';
+import verifyRouter from './routes/verify';
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.use('/escrow/create', createRouter);
 app.use('/escrow/release', releaseRouter);
 app.use('/escrow/refund', refundRouter);
 app.use('/escrow/status', statusRouter);
+app.use('/escrow/verify', verifyRouter);
 
 app.get('/', (_req, res) => {
   res.json({ status: 'ok', service: 'BulwarkX Processor' });

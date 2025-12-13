@@ -1,7 +1,8 @@
 import express from 'express';
 import { ethers } from 'ethers';
 import { v4 as uuidv4 } from 'uuid';
-import { escrowContract } from '../blockchain';
+import { CONFIG } from '../config';
+import { escrowInterface, getChainId, getEscrowContract } from '../blockchain';
 import { escrowStore, EscrowRecord } from '../db';
 
 const router = express.Router();
@@ -22,47 +23,116 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ success: false, error: 'amount is required' });
     }
 
-    const offchainRef = uuidv4();
-
-    let tx;
-    let receipt;
-    let escrowId: string = '';
-    const autoRelease = Number(autoReleaseSeconds ?? 3600);
-
-    if (usingNative) {
-      tx = await escrowContract.createEscrow(payee, arbiter, autoRelease, {
-        value: ethers.parseEther(String(amountValue))
-      });
-      receipt = await tx.wait();
-    } else {
-      const parsedAmount = BigInt(amountValue);
-      // Payer must approve this processor signer to transfer the token amount before calling createEscrowToken
-      tx = await escrowContract.createEscrowToken(payee, arbiter, tokenAddress, parsedAmount, autoRelease);
-      receipt = await tx.wait();
+    if (!usingNative && !tokenAddress) {
+      return res.status(400).json({ success: false, error: 'tokenAddress is required for token escrows' });
     }
+
+    const offchainRef = uuidv4();
+    const autoRelease = BigInt(autoReleaseSeconds ?? 3600);
+    const chainId = await getChainId();
+    const amount = usingNative ? ethers.parseEther(String(amountValue)) : BigInt(amountValue);
+    const derivedOrderId = orderId && ethers.isHexString(orderId, 32) ? orderId : ethers.id(orderId || offchainRef);
+
+    if (CONFIG.nonCustodialMode) {
+      if (!payerAddress) {
+        return res.status(400).json({ success: false, error: 'payerAddress is required in non-custodial mode' });
+      }
+
+      const contract = getEscrowContract();
+      const currentNonce = await contract.nonces(payerAddress);
+      const tokenForId = usingNative ? ethers.ZeroAddress : tokenAddress;
+      const escrowId = ethers.keccak256(
+        ethers.solidityPacked(
+          ['bytes32', 'address', 'address', 'address', 'uint256', 'uint256'],
+          [derivedOrderId, payerAddress, payee, tokenForId, amount, currentNonce]
+        )
+      );
+
+      const encodedData = escrowInterface.encodeFunctionData(
+        'createEscrowWithId(bytes32,address,address,uint256,uint64)',
+        [derivedOrderId, payee, arbiter, amount, autoRelease]
+      );
+
+      const primaryRequest = {
+        to: CONFIG.escrowContract,
+        data: encodedData,
+        value: usingNative ? amount.toString() : '0',
+        chainId,
+      };
+
+      const record: EscrowRecord = {
+        id: escrowId,
+        offchainRef,
+        orderId: derivedOrderId,
+        callbackUrl,
+        payerAddress,
+        payeeAddress: payee,
+        arbiterAddress: arbiter,
+        tokenAddress: tokenAddress || undefined,
+        amount: amount.toString(),
+        isNative: usingNative,
+        status: 'pending_signature',
+      };
+
+      escrowStore.set(escrowId, record);
+
+      if (usingNative) {
+        return res.json({
+          success: true,
+          mode: 'non-custodial',
+          escrowId,
+          offchainRef,
+          orderId: derivedOrderId,
+          txRequest: primaryRequest,
+        });
+      }
+
+      const erc20Interface = new ethers.Interface(['function approve(address spender,uint256 amount)']);
+      const approveTx = {
+        to: tokenAddress,
+        data: erc20Interface.encodeFunctionData('approve', [CONFIG.escrowContract, amount]),
+        value: '0',
+        chainId,
+      };
+
+      return res.json({
+        success: true,
+        mode: 'non-custodial',
+        escrowId,
+        offchainRef,
+        orderId: derivedOrderId,
+        txRequests: [approveTx, primaryRequest],
+      });
+    }
+
+    const contract = getEscrowContract();
+    const tx = usingNative
+      ? await contract.createEscrowWithId(derivedOrderId, payee, arbiter, amount, autoRelease, { value: amount })
+      : await contract.createEscrowTokenWithId(derivedOrderId, tokenAddress, payee, arbiter, amount, autoRelease);
+    const receipt = await tx.wait();
 
     const createdEvent = receipt?.logs
       ?.map((log: any) => {
         try {
-          return escrowContract.interface.parseLog(log);
+          return escrowInterface.parseLog(log);
         } catch (err) {
           return null;
         }
       })
       .find((parsed: any) => parsed && parsed.name === 'EscrowCreated');
 
-    escrowId = createdEvent?.args?.escrowId || '';
+    const escrowId = createdEvent?.args?.escrowId || '';
 
     const record: EscrowRecord = {
       id: escrowId,
       offchainRef,
-      orderId,
+      orderId: derivedOrderId,
       callbackUrl,
       payerAddress,
       payeeAddress: payee,
       arbiterAddress: arbiter,
       tokenAddress: tokenAddress || undefined,
-      amount: String(amountValue),
+      amount: amount.toString(),
       isNative: usingNative,
       status: 'onchain_open',
       txHash: receipt?.hash || tx.hash

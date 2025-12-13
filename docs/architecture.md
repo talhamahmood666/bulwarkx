@@ -11,8 +11,9 @@ This document summarizes the on-chain and off-chain components that make up Bulw
 
 ### Processor Service (`processor/`)
 - Express + ethers service that brokers requests from plugins/backends to the EVM contracts.
-- Route handlers create native or token escrows by routing to `createEscrow` vs. `createEscrowToken`. Token flows assume the payer has approved the processor signer to transfer the ERC-20 amount.
-- Emits JSON responses with escrow IDs and transaction hashes; designed to be called by backend APIs and ecommerce plugins.
+- **Non-custodial by default**: create/refund/release routes return transaction payloads (`to`, `data`, `value`, `chainId`) so wallets can sign and broadcast directly. ERC-20 flows include an approval payload followed by the escrow creation payload.
+- Custodial mode can be enabled by setting `NON_CUSTODIAL_MODE=false`, allowing the server to sign with `PRIVATE_KEY`.
+- Emits JSON responses with escrow IDs, transaction hashes (custodial mode), and references for monitoring events/webhooks.
 
 ### Backend (`backend/`)
 - REST API surface that fronts the processor. Endpoints under `/api/invoices` and `/api/escrows` translate web requests into processor calls for contract interactions.
@@ -33,9 +34,9 @@ This document summarizes the on-chain and off-chain components that make up Bulw
 ## Data Flow (Simplified)
 1. Order is created in an ecommerce platform.
 2. Plugin calls the backend, which forwards to the processor.
-3. Processor selects the correct chain/token path and calls the EVM escrow contract (`createEscrow` for ETH, `createEscrowToken` for ERC-20).
-4. Funds are locked on-chain; events return escrow IDs to the backend/dashboard.
-5. Release/refund/dispute actions are initiated by the payer/merchant or arbiter, updating on-chain status and propagating back to off-chain services.
+3. Processor selects the correct chain/token path. In non-custodial mode it returns encoded calldata + value for the buyer wallet to sign (`createEscrowWithId`/`createEscrowTokenWithId`).
+4. Wallet submits the transaction; the processor watches events or reads `escrows` on-chain to confirm escrow creation and status updates.
+5. Release/refund/dispute actions are initiated by the payer/merchant or arbiter. In non-custodial mode the processor returns payloads for wallets to sign; in custodial mode it can sign directly when configured.
 
 ## Non-Custodial Design
 - Funds remain in smart contracts; BulwarkX services never take custody.
