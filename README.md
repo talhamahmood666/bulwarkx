@@ -31,9 +31,9 @@ Funds live inside on-chain escrow contracts and move only via explicit rules: **
 ## 🌐 Current Testnet Deployment
 
 - 🟦 **Base Sepolia Escrow Contract:**  
-  `0xCa97AEAA6055cbA49D8626Ec44eE447c54c43f37`
+  `0x4092898476761dA6Be8Ef2cD608Ea812D6164b3e`
 - 🔍 Explorer:  
-  https://sepolia.basescan.org/address/0xca97aeaa6055cba49d8626ec44ee447c54c43f37
+  https://sepolia.basescan.org/address/0x4092898476761dA6Be8Ef2cD608Ea812D6164b3e
 
 ---
 
