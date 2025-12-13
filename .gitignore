@@ -19,6 +19,8 @@ dist
 build
 .next
 out
+!/sdk/dist
+!/sdk/dist/.gitkeep
 
 # OS
 .DS_Store
