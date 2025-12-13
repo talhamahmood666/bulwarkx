@@ -138,12 +138,12 @@ npm install
 npm run dev
 ```
 
-Create processor/.env from processor/.env.example:
+Create processor/.env from processor/env.example:
 ```bash
 RPC_URL=...
 ESCROW_CONTRACT=0x...
 NON_CUSTODIAL_MODE=true
-# PRIVATE_KEY=...  # required only if NON_CUSTODIAL_MODE=false
+# Set PRIVATE_KEY locally only when NON_CUSTODIAL_MODE=false
 PORT=3000
 ```
 🔌 Key endpoints

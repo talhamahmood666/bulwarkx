@@ -35,7 +35,7 @@ function bulwarkx_init_gateway_class() {
             $this->description  = $this->get_option('description');
             $this->enabled      = $this->get_option('enabled');
             $this->api_base_url = $this->get_option('api_base_url');
-            $this->api_key      = $this->get_option('api_key');
+            $this->api_token    = $this->get_option('api_token');
 
             add_action(
                 'woocommerce_update_options_payment_gateways_' . $this->id,
@@ -67,10 +67,10 @@ function bulwarkx_init_gateway_class() {
                     'type'        => 'text',
                     'description' => __('Your BulwarkX backend URL, e.g. https://api.bulwarkx.com', 'bulwarkx'),
                 ],
-                'api_key' => [
-                    'title'       => __('API Key', 'bulwarkx'),
+                'api_token' => [
+                    'title'       => __('API Token', 'bulwarkx'),
                     'type'        => 'password',
-                    'description' => __('BulwarkX API key for this store.', 'bulwarkx'),
+                    'description' => __('BulwarkX API token for this store.', 'bulwarkx'),
                 ]
             ];
         }

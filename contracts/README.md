@@ -14,10 +14,10 @@ Use Hardhat + TypeScript for compilation and testing.
    npm install
    ```
 
-2. Copy `.env.example` to `.env` and fill in your Base RPC URL + deployer private key (prefixed with `0x`):
+2. Copy `env.example` to `.env` and fill in your Base RPC URL + deployer private key (prefixed with `0x`):
 
    ```bash
-   cp .env.example .env
+   cp env.example .env
    ```
 
 3. Compile the contracts:
