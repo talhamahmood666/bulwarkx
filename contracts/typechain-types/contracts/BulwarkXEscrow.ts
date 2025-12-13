@@ -225,9 +225,9 @@ export interface BulwarkXEscrow extends BaseContract {
 
   createEscrowToken: TypedContractMethod<
     [
-      _token: AddressLike,
       _payee: AddressLike,
       _arbiter: AddressLike,
+      _token: AddressLike,
       _amount: BigNumberish,
       _autoReleaseSeconds: BigNumberish
     ],
@@ -285,9 +285,9 @@ export interface BulwarkXEscrow extends BaseContract {
     nameOrSignature: "createEscrowToken"
   ): TypedContractMethod<
     [
-      _token: AddressLike,
       _payee: AddressLike,
       _arbiter: AddressLike,
+      _token: AddressLike,
       _amount: BigNumberish,
       _autoReleaseSeconds: BigNumberish
     ],

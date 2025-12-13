@@ -1,5 +1,13 @@
-[workspace]
-members = [
-    "programs/bulwarkx-escrow"
-]
-resolver = "2"
+[package]
+name = "bulwarkx_escrow"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "bulwarkx_escrow"
+crate-type = ["cdylib", "lib"]
+path = "programs/bulwarkx_escrow/src/lib.rs"
+
+[dependencies]
+anchor-lang = "0.30.0"
+anchor-spl = "0.30.0"

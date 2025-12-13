@@ -1,96 +1,47 @@
+# BulwarkX Architecture Overview
 
-BulwarkX Architecture Overview
-This document provides a high-level overview of how the BulwarkX system is structured.
+This document summarizes the on-chain and off-chain components that make up BulwarkX and how they now extend across multiple chains and token types.
 
-Components
-Smart Contracts (contracts/)
+## Components
 
-Escrow contracts that hold user funds in a non-custodial way.
+### Smart Contracts (`contracts/`)
+- **BulwarkXEscrow.sol** supports both native gas tokens (ETH) and ERC-20 tokens (e.g., USDT/USDC). Escrows can be created for either asset class, released to merchants, refunded to payers, or marked disputed with arbiter authority.
+- **MockToken.sol** provides a local ERC-20 for tests and demos.
+- **Hardhat config** now includes Base, Ethereum Sepolia, Polygon Amoy, BNB Testnet, Arbitrum Sepolia, and Optimism Sepolia network targets for deployments.
 
-Typically deployed on EVM-compatible networks (starting with Base & Optimism testnets).
+### Processor Service (`processor/`)
+- Express + ethers service that brokers requests from plugins/backends to the EVM contracts.
+- Route handlers create native or token escrows by routing to `createEscrow` vs. `createEscrowToken`. Token flows assume the payer has approved the processor signer to transfer the ERC-20 amount.
+- Emits JSON responses with escrow IDs and transaction hashes; designed to be called by backend APIs and ecommerce plugins.
 
-Expose functions to create escrows, release funds, refund funds, and involve arbitrators.
+### Backend (`backend/`)
+- REST API surface that fronts the processor. Endpoints under `/api/invoices` and `/api/escrows` translate web requests into processor calls for contract interactions.
 
-Processor Service (processor/)
+### Plugins (`plugins/`)
+- OpenCart and PrestaShop reference integrations that call into the backend/processor to request escrows for ecommerce orders.
 
-A backend service that:
+### Solana Program Template (`solana-program/`)
+- Anchor-compatible scaffold with `bulwarkx_escrow` program ID placeholder (`BulwarkXEscrow1111111111111111111111111111111`).
+- Defines an `Escrow` account, creation instruction, and stubbed release/refund handlers ready for SPL token wiring.
+- Intended for grants and roadmap visibility as BulwarkX expands beyond EVM chains.
 
-Listens to ecommerce events (order created, payment requested, etc.).
+### Tron Processor Scaffold (`tron-processor/`)
+- Express + TronWeb service with configurable full/solidity/event nodes and private key.
+- Exposes `/tron/escrow/create` to call a future Tron-compatible escrow contract (TRC20/USDT-centric), returning the transaction payload.
+- Provides CORS+JSON middleware and health endpoint for quick integration tests.
 
-Calls the smart contracts to open and manage escrows.
+## Data Flow (Simplified)
+1. Order is created in an ecommerce platform.
+2. Plugin calls the backend, which forwards to the processor.
+3. Processor selects the correct chain/token path and calls the EVM escrow contract (`createEscrow` for ETH, `createEscrowToken` for ERC-20).
+4. Funds are locked on-chain; events return escrow IDs to the backend/dashboard.
+5. Release/refund/dispute actions are initiated by the payer/merchant or arbiter, updating on-chain status and propagating back to off-chain services.
 
-Exposes APIs & webhooks for merchants and plugins.
+## Non-Custodial Design
+- Funds remain in smart contracts; BulwarkX services never take custody.
+- Role checks enforce payer/payee/arbiter permissions, and disputes require arbiter action for token or native refunds/releases.
 
-May persist data (invoices, status, metadata) in a database.
-
-Dashboard (dashboard/)
-
-A frontend where:
-
-Merchants can see escrow statuses and configuration.
-
-Developers can run test flows on testnets.
-
-Future: arbitrators and partners may access certain tools.
-
-Plugins & Integrations (plugins/ or similar)
-
-Platform-specific adapters for:
-
-OpenCart
-
-WooCommerce
-
-Other ecommerce platforms
-
-Translate native order/payment flows into BulwarkX escrow operations.
-
-Arbitrator Network (Concept)
-
-A layer of vetted third-parties that can:
-
-Resolve disputes
-
-Trigger releases or refunds based on evidence
-
-Implemented via additional contracts and/or off-chain coordination with on-chain hooks.
-
-Data Flow (Simplified)
-
-Order is created in an ecommerce platform.
-
-Plugin calls the processor, requesting an escrow for that order.
-
-Processor creates the escrow on-chain via the contracts.
-
-Buyer pays into the escrow (on-chain transaction).
-
-Merchant ships goods / provides services.
-
-If all is well:
-
-Buyer or merchant (depending on flow) confirms, and funds are released from escrow to the merchant.
-
-If there is a problem:
-
-A dispute can be opened, and an arbitrator may intervene according to protocol rules.
-
-Events & statuses are synced back to the ecommerce platform & dashboard.
-
-Non-Custodial Design
-
-The core design principle is that:
-
-BulwarkX never takes custody of user funds.
-
-Funds are always in user-controlled wallets or protocol-controlled smart contracts with clearly defined rules.
-
-Future Directions
-
-More chains and assets
-
-Advanced arbitrator reputation systems
-
-Rich analytics and monitoring (not necessarily open-sourced)
-
-Formal verification and multiple independent audits
+## Future Directions
+- Production-ready Solana program with SPL token settlement.
+- Tron escrow contract to pair with the Tron processor scaffold.
+- Additional EVM deployments and stablecoin integrations alongside formal audits.

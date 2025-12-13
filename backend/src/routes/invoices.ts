@@ -6,21 +6,29 @@ const router = express.Router();
 
 router.post("/", async (req, res) => {
   try {
-    const { payeeAddress, arbiterAddress, autoReleaseSeconds, amountEth, callbackUrl, payerAddress } = req.body || {};
+    const { payeeAddress, arbiterAddress, autoReleaseSeconds, amountEth, amountTokenWei, amountToken, tokenAddress, callbackUrl, payerAddress } = req.body || {};
 
-    if (!payeeAddress || !arbiterAddress || !amountEth) {
+    if (!payeeAddress || !arbiterAddress) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    if (!amountEth && !amountTokenWei) {
-      return res.status(400).json({ error: "Either amountEth or amountTokenWei required" });
+    const tokenAmount = amountTokenWei ?? amountToken;
+
+    if (!amountEth && !tokenAmount) {
+      return res.status(400).json({ error: "Either amountEth or token amount required" });
+    }
+
+    if (tokenAmount && !tokenAddress) {
+      return res.status(400).json({ error: "tokenAddress required for token escrows" });
     }
 
     const invoice = createInvoice({
       payeeAddress,
       arbiterAddress,
       autoReleaseSeconds: Number(autoReleaseSeconds ?? 0),
-      amountEth: String(amountEth),
+      amountEth: amountEth ? String(amountEth) : undefined,
+      amountTokenWei: tokenAmount ? String(tokenAmount) : undefined,
+      tokenAddress,
       callbackUrl,
       payerAddress,
     });
@@ -32,9 +40,12 @@ router.post("/", async (req, res) => {
         payee: payeeAddress,
         arbiter: arbiterAddress,
         amountEth,
+        amountTokenWei: tokenAmount,
+        tokenAddress,
         orderId: invoice.id,
         callbackUrl,
         payerAddress,
+        autoReleaseSeconds,
       });
 
       const { escrowId, txHash } = escrowResponse.data || {};

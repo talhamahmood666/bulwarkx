@@ -8,14 +8,15 @@ const router = express.Router();
 
 router.post('/', async (req, res) => {
   try {
-    const { payee, arbiter, amountEth, amountTokenWei, tokenAddress, orderId, callbackUrl, payerAddress, autoReleaseSeconds } = req.body || {};
+    const { payee, arbiter, amountEth, amountToken, amountTokenWei, tokenAddress, orderId, callbackUrl, payerAddress, autoReleaseSeconds } = req.body || {};
 
     if (!payee || !arbiter) {
       return res.status(400).json({ success: false, error: 'payee and arbiter are required' });
     }
 
     const usingNative = !tokenAddress;
-    const amountValue = usingNative ? amountEth : amountTokenWei;
+    const tokenAmountInput = amountTokenWei ?? amountToken;
+    const amountValue = usingNative ? amountEth : tokenAmountInput;
 
     if (!amountValue) {
       return res.status(400).json({ success: false, error: 'amount is required' });
@@ -35,7 +36,8 @@ router.post('/', async (req, res) => {
       receipt = await tx.wait();
     } else {
       const parsedAmount = BigInt(amountValue);
-      tx = await escrowContract.createEscrowToken(tokenAddress, payee, arbiter, parsedAmount, autoRelease);
+      // Payer must approve this processor signer to transfer the token amount before calling createEscrowToken
+      tx = await escrowContract.createEscrowToken(payee, arbiter, tokenAddress, parsedAmount, autoRelease);
       receipt = await tx.wait();
     }
 

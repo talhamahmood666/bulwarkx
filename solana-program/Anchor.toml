@@ -1,9 +1,12 @@
 [programs.localnet]
-bulwarkx_escrow = "BulwarkXEscrow11111111111111111111111111111111"
+bulwarkx_escrow = "BulwarkXEscrow1111111111111111111111111111111"
+
+[registry]
+url = "https://api.apr.dev"
 
 [provider]
 cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
-test = "anchor test"
+test = "npm test"

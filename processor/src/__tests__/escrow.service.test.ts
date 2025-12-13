@@ -125,9 +125,9 @@ describe('escrow.service', () => {
     });
 
     expect(ethers.__mockContractInstance.createEscrowToken).toHaveBeenCalledWith(
-      '0xtoken',
       '0xpayee',
       '0xarbiter',
+      '0xtoken',
       5n,
       900
     );

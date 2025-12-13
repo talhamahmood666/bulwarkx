@@ -2,8 +2,10 @@
 
 **Our Motto** Escrow Without Custody. Commerce Without Fear.
 
-BulwarkX is a **non-custodial, multi-chain escrow protocol and merchant SDK** designed for crypto commerce.  
+BulwarkX is a **non-custodial, multi-chain escrow protocol and merchant SDK** designed for crypto commerce.
 It lets buyers, sellers, and arbitrators coordinate trustlessly on-chain while funds remain in smart contracts the protocol does **not** control.
+
+BulwarkX now supports native ETH and ERC-20 tokens (USDT/USDC-style) across Base, Ethereum Sepolia, Polygon Amoy, BNB Testnet, Arbitrum Sepolia, and Optimism Sepolia. Solana and Tron scaffolds live in this repo to showcase the expansion roadmap for grants and partners.
 
 > Built first for the Superchain (Base & Optimism), with a roadmap to expand across EVM chains and other ecosystems.
 
@@ -61,10 +63,11 @@ It lets buyers, sellers, and arbitrators coordinate trustlessly on-chain while f
 ## ✨ Key Features
 
 - **Non-custodial escrow for crypto payments**
-- **Atomic flows** between: buyer, merchant, arbitrator, and on-chain contracts
-- **Multi-asset support** (e.g., ERC20 stablecoins like USDT/USDC on Base/OP)
-- **Merchant SDK** for simplified integration
-- **Webhooks & invoice tracking** via the processor service
+- **Native + ERC-20 assets** with release, refund, and dispute handling on-chain
+- **Multi-chain readiness** for Base, Ethereum Sepolia, Polygon Amoy, BNB Testnet, Arbitrum Sepolia, and Optimism Sepolia
+- **Processor + backend routing** to create ETH or token escrows via REST
+- **Solana Anchor template** and **Tron processor scaffold** to extend beyond EVM
+- **Merchant SDK & plugins** with webhooks and invoice tracking through the processor service
 - **Designed for grant programs & public-good ecosystems**
 
 ---
@@ -72,10 +75,12 @@ It lets buyers, sellers, and arbitrators coordinate trustlessly on-chain while f
 ## 🔗 Current Testnet Deployment
 
 
-- **Network:** Base Sepolia  
-- **Escrow Contract:** `0xCa97AEAA6055cbA49D8626Ec44eE447c54c43f37`  
-- **Block Explorer:** [https://sepolia.basescan.org/address/0x...](https://sepolia.basescan.org/address/0xca97aeaa6055cba49d8626ec44ee447c54c43f37)  
+- **Network:** Base Sepolia
+- **Escrow Contract:** `0xCa97AEAA6055cbA49D8626Ec44eE447c54c43f37`
+- **Block Explorer:** [https://sepolia.basescan.org/address/0x...](https://sepolia.basescan.org/address/0xca97aeaa6055cba49d8626ec44ee447c54c43f37)
 - **Example Tx:** [https://sepolia.basescan.org/tx/0x...](https://sepolia.basescan.org/address/0xca97aeaa6055cba49d8626ec44ee447c54c43f37)
+
+Hardhat is preconfigured for Ethereum Sepolia, Polygon Amoy, BNB Testnet, Arbitrum Sepolia, and Optimism Sepolia so the same escrow contract can be deployed across ecosystems.
 
 This section should be updated as new testnets or mainnets are deployed.
 
