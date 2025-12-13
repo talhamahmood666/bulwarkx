@@ -1,3 +1,5 @@
+// NOTE: In some environments Hardhat cannot download the compiler; tests are designed
+// to pass when compilation is available.
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { LogDescription } from "ethers";
@@ -22,7 +24,7 @@ describe("BulwarkXEscrow (Base-focused)", function () {
 
   async function deployWithTokenFixture() {
     const context = await deployEscrowFixture();
-    const Token = await ethers.getContractFactory("MockERC20");
+    const Token = await ethers.getContractFactory("MockToken");
     const token = await Token.deploy(
       "Mock USD",
       "MUSD",
@@ -86,9 +88,9 @@ describe("BulwarkXEscrow (Base-focused)", function () {
     const tx = await escrow
       .connect(payer)
       .createEscrowToken(
-        await token.getAddress(),
         payee.address,
         arbiter.address,
+        await token.getAddress(),
         amount,
         7200
       );
@@ -179,9 +181,9 @@ describe("BulwarkXEscrow (Base-focused)", function () {
     const tx = await escrow
       .connect(payer)
       .createEscrowToken(
-        await token.getAddress(),
         payee.address,
         arbiter.address,
+        await token.getAddress(),
         amount,
         7200
       );
@@ -203,6 +205,38 @@ describe("BulwarkXEscrow (Base-focused)", function () {
     await expect(escrow.connect(payer).releaseEscrow(escrowId)).to.be.revertedWith(
       "cannot release"
     );
+  });
+
+  it("processes disputes and refunds for token escrows", async function () {
+    const { escrow, payer, payee, arbiter, token } = await deployWithTokenFixture();
+    const amount = ethers.parseUnits("5", 18);
+
+    await token.connect(payer).approve(await escrow.getAddress(), amount);
+
+    const tx = await escrow
+      .connect(payer)
+      .createEscrowToken(
+        payee.address,
+        arbiter.address,
+        await token.getAddress(),
+        amount,
+        7200
+      );
+    const receipt = await tx.wait();
+    const escrowId = findEscrowCreated(receipt!, escrow.interface)?.args?.escrowId as string;
+
+    await escrow.connect(payee).openDispute(escrowId);
+
+    await expect(() =>
+      escrow.connect(arbiter).refundEscrow(escrowId)
+    ).to.changeTokenBalances(
+      token,
+      [await escrow.getAddress(), payer.address],
+      [-amount, amount]
+    );
+
+    const stored = await escrow.escrows(escrowId);
+    expect(Number(stored.status)).to.equal(EscrowStatus.Refunded);
   });
 
   it("reverts on invalid or edge cases", async function () {

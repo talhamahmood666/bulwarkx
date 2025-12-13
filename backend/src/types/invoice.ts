@@ -10,7 +10,9 @@ export interface Invoice {
   payeeAddress: string;
   arbiterAddress: string;
   autoReleaseSeconds: number;
-  amountEth: string;
+  amountEth?: string;
+  amountTokenWei?: string;
+  tokenAddress?: string;
   payerAddress?: string;
   callbackUrl?: string;
   escrowId?: string;

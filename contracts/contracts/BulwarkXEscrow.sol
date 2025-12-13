@@ -92,23 +92,25 @@ contract BulwarkXEscrow {
     }
 
     function createEscrowToken(
-        address _token,
         address _payee,
         address _arbiter,
+        address _token,
         uint256 _amount,
-        uint256 _autoReleaseSeconds
+        uint64 _autoReleaseSeconds
     ) external returns (bytes32) {
-        require(_token != address(0), "invalid token");
         require(_payee != address(0), "invalid payee");
         require(_arbiter != address(0), "invalid arbiter");
-        require(_autoReleaseSeconds > 0, "auto release must be set");
+        require(_token != address(0), "invalid token");
         require(_amount > 0, "amount must be > 0");
+        require(_autoReleaseSeconds > 0, "auto release must be set");
 
         bytes32 escrowId = keccak256(
             abi.encodePacked(msg.sender, _payee, _token, _amount, block.timestamp)
         );
 
         Escrow storage escrow = escrows[escrowId];
+        require(escrow.status == EscrowStatus.Uninitialized, "escrow exists");
+
         escrow.payer = msg.sender;
         escrow.payee = _payee;
         escrow.arbiter = _arbiter;

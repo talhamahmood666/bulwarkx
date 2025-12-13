@@ -42,9 +42,9 @@ export async function createEscrow(params: CreateEscrowParams): Promise<TxResult
           { value: typeof params.amount === 'bigint' ? params.amount : ethers.parseEther(String(params.amount)) }
         )
       : await escrowContract.createEscrowToken(
-          params.tokenAddress,
           params.payee,
           params.arbiter,
+          params.tokenAddress,
           BigInt(params.amount),
           autoReleaseSeconds
         );

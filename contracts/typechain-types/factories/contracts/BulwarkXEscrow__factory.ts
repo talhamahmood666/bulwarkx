@@ -172,11 +172,6 @@ const _abi = [
     inputs: [
       {
         internalType: "address",
-        name: "_token",
-        type: "address",
-      },
-      {
-        internalType: "address",
         name: "_payee",
         type: "address",
       },
@@ -186,14 +181,19 @@ const _abi = [
         type: "address",
       },
       {
+        internalType: "address",
+        name: "_token",
+        type: "address",
+      },
+      {
         internalType: "uint256",
         name: "_amount",
         type: "uint256",
       },
       {
-        internalType: "uint256",
+        internalType: "uint64",
         name: "_autoReleaseSeconds",
-        type: "uint256",
+        type: "uint64",
       },
     ],
     name: "createEscrowToken",
