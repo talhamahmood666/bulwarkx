@@ -1,41 +1,37 @@
-import hre from "hardhat";
+import "dotenv/config";
+import { artifacts } from "hardhat";
 import { ethers } from "ethers";
 
 async function main() {
-  try {
-    const { PRIVATE_KEY, BASE_SEPOLIA_RPC_URL } = process.env;
+  const rpcUrl = process.env.BASE_SEPOLIA_RPC_URL;
+  const pk = process.env.PRIVATE_KEY;
 
-    if (!PRIVATE_KEY || !BASE_SEPOLIA_RPC_URL) {
-      throw new Error("Missing PRIVATE_KEY or BASE_SEPOLIA_RPC_URL environment variables");
-    }
+  if (!rpcUrl) throw new Error("Missing BASE_SEPOLIA_RPC_URL env var");
+  if (!pk) throw new Error("Missing PRIVATE_KEY env var");
 
-    const provider = new ethers.JsonRpcProvider(BASE_SEPOLIA_RPC_URL);
-    const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
+  const provider = new ethers.JsonRpcProvider(rpcUrl);
+  const wallet = new ethers.Wallet(pk, provider);
 
-    const artifact = await hre.artifacts.readArtifact("BulwarkXEscrow");
-    const factory = new ethers.ContractFactory(
-      artifact.abi,
-      artifact.bytecode,
-      wallet
-    );
+  const net = await provider.getNetwork();
+  const bal = await provider.getBalance(wallet.address);
 
-    const contract = await factory.deploy();
-    await contract.waitForDeployment();
+  console.log("Network chainId:", net.chainId.toString());
+  console.log("Deployer:", wallet.address);
+  console.log("Deployer balance (wei):", bal.toString());
 
-    const network = await provider.getNetwork();
-    const balance = await wallet.getBalance();
-    const deploymentTx = contract.deploymentTransaction();
-    const address = await contract.getAddress();
+  const art = await artifacts.readArtifact("BulwarkXEscrow");
+  const factory = new ethers.ContractFactory(art.abi, art.bytecode, wallet);
 
-    console.log("chainId:", network.chainId.toString());
-    console.log("deployer address:", wallet.address);
-    console.log("deployer balance:", balance.toString());
-    console.log("deployment tx hash:", deploymentTx?.hash ?? "");
-    console.log("deployed contract address:", address);
-  } catch (error) {
-    console.error(error);
-    process.exitCode = 1;
-  }
+  const contract = await factory.deploy();
+  const tx = contract.deploymentTransaction();
+  console.log("Deploy tx hash:", tx?.hash);
+
+  await contract.waitForDeployment();
+  const addr = await contract.getAddress();
+  console.log("BulwarkXEscrow deployed to:", addr);
 }
 
-main();
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
