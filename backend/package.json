@@ -5,17 +5,24 @@
   "scripts": {
     "dev": "ts-node-dev --respawn src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "db:migrate": "node -e \"require('fs').readFileSync('src/db/schema.sql', 'utf8').split(';').forEach(s => s.trim() && require('./src/db/pool').query(s))\""
   },
   "dependencies": {
     "axios": "^1.7.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.0",
-    "express": "^4.19.0"
+    "express": "^4.19.0",
+    "pg": "^8.11.0",
+    "uuid": "^9.0.0",
+    "ws": "^8.14.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
     "@types/node": "^22.0.0",
+    "@types/pg": "^8.10.0",
+    "@types/uuid": "^9.0.0",
+    "@types/ws": "^8.5.0",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.7.0"
   }
